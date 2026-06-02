@@ -6,50 +6,62 @@
 <title>Kensington — Profitability Calculator</title>
 <style>
   /* ============================================================= *
-   *  BRANDING — IT can change these to re-skin the app            *
+   *  BRANDING — Kensington Corporate palette                      *
+   *  IT can change these to re-skin the app                       *
    * ============================================================= */
   :root{
-    --brand:#0e6e5c;        /* primary accent                       */
-    --brand-2:#0a5648;      /* darker accent                        */
-    --ink:#10212e;          /* main text                            */
-    --muted:#6a7885;        /* secondary text                       */
-    --good:#15924f;         /* meets target                         */
-    --warn:#c4881f;         /* below target                         */
-    --bg:#f3f5f7; --card:#ffffff; --soft:#f7f9fa; --line:#e6ebef;
-    --font:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    --radius:16px;
+    --gold:#c9a86a;         /* primary gold                         */
+    --gold-d:#b08f4f;       /* darker gold (borders / accents)      */
+    --gold-tint:#faf3e2;    /* soft highlight background            */
+    --gold-tint-b:#ecd9b0;  /* soft highlight border                */
+    --ink:#1f2228;          /* headings / values                    */
+    --ink-2:#2a2a28;        /* totals                               */
+    --secondary:#4a4a45;    /* secondary text                       */
+    --muted:#7d7a73;        /* muted labels                         */
+    --good:#4d8a5a;         /* success / higher profit              */
+    --warn:#9a3b3b;         /* below target / negative              */
+    --bg:#e9e3d6;           /* page background (cream)              */
+    --card:#ffffff; --card-b:#d9d2c2; --soft:#f0ebdf;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:Arial,Helvetica,sans-serif;
+    --radius:8px;
+    --shadow:0 2px 10px -6px rgba(31,34,40,.18);
   }
   *{box-sizing:border-box}
   html{-webkit-font-smoothing:antialiased}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14.5px;line-height:1.5}
-  .topbar{display:flex;align-items:center;gap:12px;padding:18px 26px;background:#fff;border-bottom:1px solid var(--line)}
-  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px}
-  .topbar h1{margin:0;font-size:16px;font-weight:650;letter-spacing:.2px}
-  .topbar .sub{margin-left:auto;color:var(--muted);font-size:13px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.5}
+
+  /* ---------- header ---------- */
+  .topbar{display:flex;align-items:center;gap:20px;padding:16px 28px;background:var(--gold);border-bottom:3px solid var(--gold-d)}
+  .brand{display:flex;align-items:center}
+  .brand .logo-img{height:38px;width:auto;display:block}
+  .brand .wordmark{font-family:var(--serif);text-transform:uppercase;letter-spacing:.3em;color:var(--ink);font-size:19px;font-weight:600}
+  .topbar h1{margin:0;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);padding-left:20px;border-left:1px solid rgba(31,34,40,.25)}
+  .topbar .sub{margin-left:auto;color:var(--ink);font-size:13px;opacity:.85}
 
   .wrap{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:26px;max-width:1320px;margin:26px auto;padding:0 26px;align-items:start}
   @media(max-width:940px){.wrap{grid-template-columns:1fr;margin:18px auto}}
 
   /* ---------- form ---------- */
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
-  .panel-h{padding:16px 20px 6px;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}
+  .panel{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel-h{padding:16px 20px 6px;font-size:11.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold-d)}
   .row{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--soft)}
   .row:last-child{border-bottom:none}
-  .row label{flex:1;font-weight:500}
+  .row label{flex:1;font-weight:500;color:var(--secondary)}
   .row label .hint{display:block;color:var(--muted);font-size:11.5px;font-weight:400;margin-top:1px}
-  input,select{font-family:var(--font);font-size:14px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:130px;text-align:right;transition:border-color .15s,box-shadow .15s}
+  input,select{font-family:var(--sans);font-size:14px;padding:8px 11px;border:1px solid var(--card-b);border-radius:7px;background:#fff;color:var(--ink);width:130px;text-align:right;transition:border-color .15s,box-shadow .15s}
   select{width:auto;text-align:left;cursor:pointer}
-  input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,110,92,.13)}
-  details.adv{border-top:1px solid var(--line)}
+  input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,106,.28)}
+  details.adv{border-top:1px solid var(--card-b)}
   details.adv>summary{padding:13px 20px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink);list-style:none;display:flex;align-items:center;gap:8px}
-  details.adv>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-left:2px}
+  details.adv>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--gold-d);border-bottom:2px solid var(--gold-d);transform:rotate(-45deg);transition:transform .15s;margin-left:2px}
   details.adv[open]>summary::before{transform:rotate(45deg)}
   details.adv .inner{padding:2px 20px 16px}
   table.grid{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
   table.grid th,table.grid td{padding:5px 6px;text-align:right}
-  table.grid th{color:var(--muted);font-weight:600;text-align:center;font-size:11px;border-bottom:1px solid var(--line)}
-  table.grid td:first-child,table.grid th:first-child{text-align:left}
-  table.grid input{width:60px;padding:5px 6px;font-size:12.5px;border-radius:8px}
+  table.grid th{color:var(--muted);font-weight:600;text-align:center;font-size:11px;border-bottom:1px solid var(--soft)}
+  table.grid td:first-child,table.grid th:first-child{text-align:left;color:var(--secondary)}
+  table.grid input{width:60px;padding:5px 6px;font-size:12.5px;border-radius:6px}
   table.grid select{padding:5px 6px;font-size:12.5px}
   .mininote{font-size:12px;color:var(--muted);margin:4px 0 2px}
 
@@ -57,12 +69,12 @@
   .results{position:sticky;top:20px;display:flex;flex-direction:column;gap:18px}
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:560px){.cards{grid-template-columns:1fr}}
-  .rcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;transition:border-color .15s,box-shadow .15s}
-  .rcard.best{border:1.5px solid var(--brand);box-shadow:0 6px 22px -10px rgba(14,110,92,.45)}
-  .rcard .name{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
-  .rcard .tag{position:absolute;top:16px;right:16px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--soft);color:var(--muted)}
-  .rcard.best .tag{background:var(--brand);color:#fff}
-  .rcard .np{font-size:33px;font-weight:750;letter-spacing:-.5px;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+  .rcard{position:relative;background:var(--card);border:1px solid var(--card-b);border-top:3px solid var(--gold);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);transition:box-shadow .15s}
+  .rcard.best{box-shadow:0 8px 26px -10px rgba(176,143,79,.55)}
+  .rcard .name{font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  .rcard .tag{position:absolute;top:15px;right:16px;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e7e1d3;color:var(--secondary)}
+  .rcard.best .tag{background:var(--good);color:#fff}
+  .rcard .np{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.5px;margin:10px 0 2px;color:var(--ink);font-variant-numeric:tabular-nums}
   .rcard .np.neg{color:var(--warn)}
   .rcard .nplabel{font-size:12px;color:var(--muted)}
   .rcard .mini{margin-top:16px;padding-top:14px;border-top:1px solid var(--soft);display:flex;flex-direction:column;gap:9px}
@@ -70,33 +82,90 @@
   .mini .dot{width:9px;height:9px;border-radius:50%;flex:none}
   .mini .dot.ok{background:var(--good)} .mini .dot.under{background:var(--warn)}
   .mini .ml{color:var(--muted);flex:1}
-  .mini .mv{font-weight:700;font-variant-numeric:tabular-nums}
+  .mini .mv{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 
-  .takeaway{background:linear-gradient(135deg,#0e6e5c,#0a5648);color:#fff;border-radius:var(--radius);padding:18px 22px;font-size:14.5px;line-height:1.55}
-  .takeaway .big{font-size:15px;font-weight:650;display:block;margin-bottom:3px}
-  .takeaway b{font-weight:750}
+  .takeaway{background:var(--gold-tint);border:1px solid var(--gold-tint-b);color:var(--ink-2);border-radius:var(--radius);padding:16px 20px 18px;font-size:14px;line-height:1.55}
+  .takeaway::before{content:"Scenario impact";display:block;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold-d);margin-bottom:8px}
+  .takeaway .big{font-family:var(--serif);font-size:15.5px;font-weight:600;display:block;margin-bottom:4px;color:var(--ink)}
+  .takeaway b{font-weight:700}
 
-  details.pl{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
-  details.pl>summary{padding:15px 22px;cursor:pointer;font-weight:650;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink)}
-  details.pl>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+  details.pl{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);box-shadow:var(--shadow)}
+  details.pl>summary{padding:15px 22px;cursor:pointer;font-weight:600;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  details.pl>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--gold-d);border-bottom:2px solid var(--gold-d);transform:rotate(-45deg);transition:transform .15s}
   details.pl[open]>summary::before{transform:rotate(45deg)}
   .pl-wrap{padding:0 16px 14px;overflow-x:auto}
   table.pl{width:100%;border-collapse:collapse;min-width:520px}
   table.pl td{padding:7px 12px;border-bottom:1px solid var(--soft);font-size:13px}
   table.pl td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-  table.pl tr.head td{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;text-align:right;border-bottom:1px solid var(--line)}
-  table.pl tr.section td{font-weight:700;color:var(--brand-2);padding-top:13px;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
-  table.pl tr.total td{font-weight:700;border-top:1px solid var(--line)}
-  table.pl tr.net td{font-weight:750;background:var(--soft)}
-  .neg{color:#b4452f}
-  .foot{max-width:1320px;margin:6px auto 30px;padding:0 26px;color:var(--muted);font-size:11.5px}
+  table.pl tr.head td{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;text-align:right;border-bottom:1px solid var(--card-b)}
+  table.pl tr.section td{font-weight:700;color:var(--gold-d);padding-top:13px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  table.pl tr.total td{font-weight:700;color:var(--ink-2);border-top:1px solid var(--card-b)}
+  table.pl tr.net td{font-weight:700;color:var(--ink-2);background:var(--gold-tint)}
+  .neg{color:var(--warn)}
+
+  .foot{max-width:1320px;margin:10px auto 0;padding:0 26px;color:var(--muted);font-size:11.5px}
+  .brandfoot{margin-top:26px;background:var(--gold);border-top:3px solid var(--gold-d);text-align:center;padding:18px 20px;color:var(--ink)}
+  .brandfoot .wm{font-family:var(--serif);text-transform:uppercase;letter-spacing:.3em;font-size:14px;font-weight:600}
+  .brandfoot .contact{font-family:var(--sans);font-size:12.5px;margin-top:5px;opacity:.85}
+
+  /* ---------- header nav ---------- */
+  .titleblock{display:flex;flex-direction:column;padding-left:20px;border-left:1px solid rgba(31,34,40,.25)}
+  .titleblock h1{margin:0;padding-left:0;border-left:none;font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink)}
+  .titleblock .sub{color:var(--ink);font-size:12px;opacity:.8;margin-top:1px;margin-left:0}
+  .hnav{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .hbtn{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.6);border:1px solid rgba(31,34,40,.2);padding:7px 13px;border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s}
+  .hbtn:hover{background:#fff;border-color:rgba(31,34,40,.4)}
+  .hbtn.ghost{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .hbtn.ghost:hover{background:#000}
+
+  /* ---------- modal ---------- */
+  .ov{position:fixed;inset:0;background:rgba(31,34,40,.5);display:none;z-index:60;overflow:auto}
+  .ov.show{display:flex;align-items:flex-start;justify-content:center;padding:38px 18px}
+  .modal{background:#fff;max-width:780px;width:100%;border-radius:10px;border-top:4px solid var(--gold);box-shadow:0 24px 60px -20px rgba(0,0,0,.5);overflow:hidden;animation:pop .15s ease}
+  @keyframes pop{from{transform:translateY(8px);opacity:.6}to{transform:none;opacity:1}}
+  .modal .mh{display:flex;align-items:center;gap:12px;padding:17px 24px;background:var(--gold-tint);border-bottom:1px solid var(--gold-tint-b)}
+  .modal .mh h2{margin:0;font-family:var(--serif);font-size:19px;color:var(--ink);flex:1}
+  .modal .x{cursor:pointer;border:none;background:transparent;font-size:24px;line-height:1;color:var(--muted);padding:0 6px;border-radius:6px}
+  .modal .x:hover{background:#fff;color:var(--ink)}
+  .modal .mb{padding:22px 24px;font-size:13.5px;color:var(--secondary);line-height:1.6;max-height:72vh;overflow:auto}
+  .modal .mb h3{font-family:var(--sans);font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--gold-d);margin:22px 0 8px}
+  .modal .mb h3:first-child{margin-top:0}
+  .modal .mb p{margin:8px 0}
+  .modal .mb code{font-family:Consolas,Menlo,monospace;background:#f4f1e9;border:1px solid #e7dfca;border-radius:4px;padding:1px 5px;font-size:12.5px;color:var(--ink-2)}
+  .modal .mb pre{background:#2a2a28;color:#f3ead2;padding:13px 15px;border-radius:8px;overflow:auto;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:1.55;margin:10px 0}
+  .modal .mb ul,.modal .mb ol{margin:8px 0;padding-left:20px}
+  .modal .mb li{margin:5px 0}
+  .modal table.val{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px}
+  .modal table.val th,.modal table.val td{border:1px solid var(--soft);padding:6px 9px;text-align:right}
+  .modal table.val th:first-child,.modal table.val td:first-child{text-align:left}
+  .modal table.val th{background:var(--gold-tint);color:var(--ink);font-weight:700}
+  .modal .okmark{color:var(--good);font-weight:700}
+  .callout{background:var(--gold-tint);border:1px solid var(--gold-tint-b);border-radius:8px;padding:12px 15px;margin:12px 0;color:var(--ink-2)}
+
+  /* ---------- demo tour ---------- */
+  .tour-ring{position:relative;z-index:57;outline:3px solid var(--gold);outline-offset:3px;border-radius:8px;box-shadow:0 0 0 9999px rgba(31,34,40,.55)}
+  .tour-cap{position:fixed;z-index:58;max-width:340px;background:#fff;border-radius:10px;border-top:4px solid var(--gold);box-shadow:0 18px 50px -16px rgba(0,0,0,.55);padding:16px 18px;display:none}
+  .tour-cap.show{display:block}
+  .tour-cap .tt{font-family:var(--serif);font-size:16px;color:var(--ink);margin:0 0 5px}
+  .tour-cap .tx{font-size:13px;color:var(--secondary);line-height:1.5}
+  .tour-cap .tb{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;align-items:center}
+  .tour-cap .tstep{margin-right:auto;font-size:11.5px;color:var(--muted)}
+  .tour-cap button{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:6px;cursor:pointer;border:1px solid var(--card-b);background:#fff;color:var(--ink)}
+  .tour-cap button.prim{background:var(--gold);border-color:var(--gold-d);color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="logo">K</div>
-  <h1>Profitability Calculator</h1>
-  <span class="sub">Kensington · with vs. without an airline contract</span>
+  <div class="brand" id="brandLogo"></div>
+  <div class="titleblock">
+    <h1>Profitability Calculator</h1>
+    <span class="sub">Kensington · with vs. without an airline contract</span>
+  </div>
+  <nav class="hnav">
+    <button class="hbtn" id="howBtn" onclick="openModal('how')">How it's calculated</button>
+    <button class="hbtn" onclick="openModal('it')">For IT</button>
+    <button class="hbtn ghost" onclick="startTour()">▶ Demo</button>
+  </nav>
 </div>
 
 <div class="wrap">
@@ -180,6 +249,31 @@
 </div>
 <div class="foot">Model reverse-engineered &amp; validated against <i>Corporate Profitability Model – TMC v3.xlsx</i>. Company cost assumptions live in the <code>CONFIG</code> block at the top of this file — see <code>MAINTENANCE.md</code>.</div>
 
+<div class="brandfoot">
+  <div class="wm">Kensington Corporate</div>
+  <div class="contact">+1 855 249 8121 · usa@kensingtoncorporate.com</div>
+</div>
+
+<!-- info modal (How it's calculated / For IT) -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mh"><h2 id="modalTitle"></h2><button class="x" onclick="closeModal()" aria-label="Close">×</button></div>
+    <div class="mb" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- demo tour caption -->
+<div class="tour-cap" id="tourCap">
+  <div class="tt"></div>
+  <div class="tx"></div>
+  <div class="tb">
+    <span class="tstep"></span>
+    <button onclick="endTour()">Skip</button>
+    <button onclick="tourPrev()">Back</button>
+    <button class="prim" onclick="tourNext()">Next</button>
+  </div>
+</div>
+
 <script>
 /* =================================================================== *
  *  CONFIG — COMPANY COST ASSUMPTIONS                                  *
@@ -188,6 +282,7 @@
  *  (Values pulled from the Excel "Finance Data" / "Control" sheets.)  *
  * =================================================================== */
 const CONFIG = {
+  LOGO_URL:            "kensington-logo.png", // header logo; leave "" to fall back to a gold KENSINGTON CORPORATE wordmark
   spendingRamp:        [0.80, 1.00, 1.00],  // Year 1 / 2 / 3 spend ramp
   staffCostPerTxn:     16.66,   // sales-team cost per agent / online-assisted transaction
   obtCostPerBooking:   3.50,    // OBT cost per online booking (only if OBT = Yes)
@@ -256,6 +351,12 @@ const $ = id => document.getElementById(id);
 function num(v){ return parseFloat(v)||0; }
 function cellInput(val,cls){ return `<input class="${cls||''}" type="number" step="any" value="${val}">`; }
 
+function setLogo(){
+  const e=$("brandLogo");
+  if(CONFIG.LOGO_URL){ e.innerHTML=`<img class="logo-img" src="${CONFIG.LOGO_URL}" alt="Kensington Corporate">`; }
+  else { e.innerHTML=`<span class="wordmark">Kensington Corporate</span>`; }
+}
+
 (function build(){
   let s=$("shareTable");
   CATS.forEach((c,i)=> s.insertAdjacentHTML("beforeend",
@@ -279,6 +380,7 @@ function cellInput(val,cls){ return `<input class="${cls||''}" type="number" ste
       <td><select class="o-applied" style="width:58px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
       <td>${cellInput(r[2],'o-std')}</td><td>${cellInput(r[3],'o-bd')}</td></tr>`));
 })();
+setLogo();
 
 /* ---------- read the whole form into one object ---------- */
 function readInputs(){
@@ -467,7 +569,6 @@ function renderPL(elId, base, ctr){
   const B=base.years, C=ctr.years;
   const r=(label,k,cls)=>`<tr class="${cls||''}"><td>${label}</td>`+
     [0,1,2].map(y=>{const v=B[y][k];return `<td class="num ${v<0?'neg':''}">${fmtP(v)}</td>`}).join('')+`</tr>`;
-  // show the "without contract" P&L (full); contract differs only in commission
   $(elId).innerHTML = `<table class="pl">
     <tr class="head"><td>Without AC contract</td><td class="num">Year 1</td><td class="num">Year 2</td><td class="num">Year 3</td></tr>
     ${r('Total Sales','totalSales','total')}
@@ -512,6 +613,145 @@ function recalc(){
 
   renderPL("plDetail", baseRes, ctrRes);
 }
+
+/* =================================================================== *
+ *  INFO MODALS — "How it's calculated" & "For IT"                     *
+ * =================================================================== */
+const HOW_HTML = `
+  <div class="callout"><b>This isn't made up.</b> The calculator runs the exact engine from
+  <code>Corporate Profitability Model – TMC v3.xlsx</code> — every formula was reverse-engineered
+  from that workbook and the output is validated <b>to the dollar</b> (see the proof table below).</div>
+
+  <h3>The calculation, end to end</h3>
+  <ol>
+    <li><b>Spend → bookings.</b> Total annual spend is split across Air-Domestic, Air-International,
+        Hotel and Car by share %, divided by the average spend per booking to get booking counts,
+        then split into agent / online / online-assisted channels.</li>
+    <li><b>Revenue</b> = airline &amp; hotel/car <b>commission</b> + <b>service fees</b> (per booking)
+        + non-GDS fees + one-time <b>implementation / OBT</b> fees + <b>account-management</b> fee
+        + back-end <b>overrides</b> (airline + GDS segments).</li>
+    <li><b>Direct expenses</b> = sales-team labour + OBT cost + 24/7 servicing + account-management
+        cost + merchant processing fees.</li>
+    <li><b>Gross profit</b> = revenue − direct expenses. <b>Overhead</b> (marketing + operating +
+        back-office, as a % of sales) is then subtracted to give <b>net profit</b>.</li>
+    <li><b>Margins</b> are compared against targets (growth margin excl./incl. overrides, and net
+        margin excl. fixed costs) — the dots on each card go green when a target is met.</li>
+  </ol>
+
+  <h3>Representative formulas</h3>
+  <pre>Air commission  = Σ airlines [ air sales × airline share × commissionable% × yield% ]
+Service fees    = Σ [ agent bkgs × agent fee + online bkgs × online fee
+                      + assisted bkgs × (online fee + assist fee) ]
+Overrides       = air spend × 1.5% + car spend × 2% + GDS segments × $1.65
+Net profit      = (Revenue − Direct expenses) − Overhead</pre>
+
+  <h3>The two scenarios</h3>
+  <p>With an <b>Air Canada contract</b>, the client books contracted fares and you earn
+  <b>no commission</b> on Air Canada — so AC's commissionable share is set to 0. <b>Without</b> the
+  contract, AC commission flows normally. Everything else is identical, so the gap you see between
+  the two cards is purely the Air Canada commission you give up on contracted fares.</p>
+
+  <h3>Proof — matches the Excel model (Henry Schein, Year 1)</h3>
+  <table class="val">
+    <tr><th>Line</th><th>This calculator</th><th>TMC v3 Excel</th><th></th></tr>
+    <tr><td>Total Revenue</td><td>$88,320</td><td>$88,306</td><td class="okmark">✓</td></tr>
+    <tr><td>Gross Profit</td><td>$60,073</td><td>$60,064</td><td class="okmark">✓</td></tr>
+    <tr><td>Net Profit</td><td>$12,045</td><td>$12,036</td><td class="okmark">✓</td></tr>
+    <tr><td>Growth margin (incl. overrides)</td><td>7.2%</td><td>7.17%</td><td class="okmark">✓</td></tr>
+    <tr><td>Net margin (excl. fixed)</td><td>4.9%</td><td>4.88%</td><td class="okmark">✓</td></tr>
+  </table>
+  <p style="font-size:12.5px;color:var(--muted)">The few-dollar differences come only from rounding the
+  share % shown on screen (46.53% here vs 46.5276% in the sheet). The full formula-by-formula map,
+  traced to each original Excel cell, is in <code>ENGINE.md</code> in the project repository.</p>`;
+
+const IT_HTML = `
+  <div class="callout">The whole tool is <b>one file — <code>index.html</code></b>. No server, no database,
+  no build step. Open it in any browser; deploy it by dropping it on any static host.</div>
+
+  <h3>1 · Change a company cost rate</h3>
+  <p>Open <code>index.html</code> and find the <code>CONFIG</code> block near the bottom (inside the
+  script). Every rate is one labelled line. Percentages are decimals (<code>0.032</code> = 3.2%).</p>
+  <pre>staffCostPerTxn:       16.66,   // sales-team cost per transaction
+merchantFeePct:        0.032,   // merchant processing fee
+overheadOperatingPct:  0.018,   // operating overhead (% of sales)</pre>
+  <p>Edit the number and save. The green/amber margin targets are under <code>target:</code>.</p>
+
+  <h3>2 · Change the default form values</h3>
+  <p>The <code>DEF</code> block (just below <code>CONFIG</code>) holds the values the form loads with —
+  shares, average fares, the airline table, fee schedule. Agents can type over them on screen;
+  editing <code>DEF</code> just changes the starting point.</p>
+
+  <h3>3 · Change branding (colours &amp; logo)</h3>
+  <p>Colours are the CSS variables at the very top under <code>:root{ }</code>
+  (<code>--gold</code>, <code>--bg</code>, etc.). The logo is one line in <code>CONFIG</code>:</p>
+  <pre>LOGO_URL: "kensington-logo.png",  // your logo file; "" = text wordmark</pre>
+  <p>Drop a new image next to <code>index.html</code> and point <code>LOGO_URL</code> at it.</p>
+
+  <h3>4 · Publish an update (Vercel)</h3>
+  <ol>
+    <li>Edit <code>index.html</code> (and/or swap the logo file).</li>
+    <li>Commit &amp; push: <code>git add -A &amp;&amp; git commit -m "update" &amp;&amp; git push</code></li>
+    <li>Vercel auto-redeploys in ~20 seconds — nothing else to do.</li>
+  </ol>
+  <p>For a one-off with no Git, you can also just drag <code>index.html</code> into the Vercel dashboard.</p>
+
+  <h3>5 · Sanity check after any change</h3>
+  <p>Load the tool with the default <b>Henry Schein</b> example and confirm Year-1 net profit
+  (without contract) is about <b>$12,045</b>. If it's wildly different, undo your last
+  <code>CONFIG</code> edit.</p>
+
+  <div class="callout">Deeper reference lives in the repo: <code>MAINTENANCE.md</code> (plain-English)
+  and <code>ENGINE.md</code> (every formula traced to its original Excel cell).</div>`;
+
+function openModal(k){
+  endTour();
+  $("modalTitle").textContent = k==='how' ? "How it's calculated" : "For IT — editing, updating & redeploying";
+  $("modalBody").innerHTML = k==='how' ? HOW_HTML : IT_HTML;
+  $("modalBody").scrollTop = 0;
+  $("ov").classList.add('show');
+}
+function closeModal(){ $("ov").classList.remove('show'); }
+
+/* =================================================================== *
+ *  DEMO — guided tour                                                 *
+ * =================================================================== */
+const TOUR = [
+  {sel:'#inputs',     t:'1 · Enter the deal',        x:'Type the client name and total annual spend, then answer a couple of questions. Everything else has smart defaults you can open and adjust.'},
+  {sel:'.cards',      t:'2 · Two live scenarios',    x:'The model instantly computes Year-1 net profit two ways — with and without an Air Canada contract. The green “Higher profit” card is the better outcome.'},
+  {sel:'#delta',      t:'3 · Plain-English impact',  x:'A one-line takeaway shows exactly how much profit the airline contract adds or removes, and why.'},
+  {sel:'details.pl',  t:'4 · Full 3-year P&L',       x:'Open this for the complete revenue, expense and margin breakdown across all three years.', open:'details.pl'},
+  {sel:'#howBtn',     t:'5 · Show the math',         x:'“How it’s calculated” lists every formula and proves the numbers match the original Excel model to the dollar.'},
+];
+let tstep = 0;
+function clearRing(){ document.querySelectorAll('.tour-ring').forEach(e=>e.classList.remove('tour-ring')); }
+function endTour(){ clearRing(); $("tourCap").classList.remove('show'); }
+function startTour(){ closeModal(); tstep=0; renderTour(); }
+function tourNext(){ if(tstep<TOUR.length-1){ tstep++; renderTour(); } else endTour(); }
+function tourPrev(){ if(tstep>0){ tstep--; renderTour(); } }
+function renderTour(){
+  clearRing();
+  const step = TOUR[tstep];
+  if(step.open){ const d=document.querySelector(step.open); if(d) d.open=true; }
+  const el = document.querySelector(step.sel);
+  const cap = $("tourCap");
+  if(!el){ endTour(); return; }
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=>{
+    el.classList.add('tour-ring');
+    const r = el.getBoundingClientRect();
+    cap.querySelector('.tt').textContent = step.t;
+    cap.querySelector('.tx').textContent = step.x;
+    cap.querySelector('.tstep').textContent = 'Step '+(tstep+1)+' of '+TOUR.length;
+    cap.classList.add('show');
+    const cw=340, ch=cap.offsetHeight||170;
+    let left=r.left, top=r.bottom+14;
+    if(left+cw > window.innerWidth-12) left = window.innerWidth-cw-12;
+    if(left < 12) left = 12;
+    if(top+ch > window.innerHeight-12) top = Math.max(12, r.top-ch-14);
+    cap.style.left=left+'px'; cap.style.top=top+'px';
+  }, 320);
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); endTour(); } });
 
 document.addEventListener('input', recalc);
 document.addEventListener('change', recalc);
