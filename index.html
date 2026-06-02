@@ -56,12 +56,12 @@
   details.adv>summary{padding:13px 20px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink);list-style:none;display:flex;align-items:center;gap:8px}
   details.adv>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--gold-d);border-bottom:2px solid var(--gold-d);transform:rotate(-45deg);transition:transform .15s;margin-left:2px}
   details.adv[open]>summary::before{transform:rotate(45deg)}
-  details.adv .inner{padding:2px 20px 16px}
+  details.adv .inner{padding:2px 20px 16px;overflow-x:auto}
   table.grid{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
   table.grid th,table.grid td{padding:5px 6px;text-align:right}
   table.grid th{color:var(--muted);font-weight:600;text-align:center;font-size:11px;border-bottom:1px solid var(--soft)}
   table.grid td:first-child,table.grid th:first-child{text-align:left;color:var(--secondary)}
-  table.grid input{width:60px;padding:5px 6px;font-size:12.5px;border-radius:6px}
+  table.grid input{width:56px;padding:5px 6px;font-size:12.5px;border-radius:6px}
   table.grid select{padding:5px 6px;font-size:12.5px}
   .mininote{font-size:12px;color:var(--muted);margin:4px 0 2px}
 
@@ -159,7 +159,6 @@
   <div class="brand" id="brandLogo"></div>
   <div class="titleblock">
     <h1>Profitability Calculator</h1>
-    <span class="sub">Kensington · with vs. without an airline contract</span>
   </div>
   <nav class="hnav">
     <button class="hbtn" id="howBtn" onclick="openModal('how')">How it's calculated</button>
@@ -173,7 +172,8 @@
   <div class="panel" id="inputs">
     <div class="panel-h">Client &amp; deal</div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
-    <div class="row"><label>Total annual spend ($)</label><input type="number" id="totalSpend" value="1500000"></div>
+    <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
+    <div class="row"><label>Total annual spend</label><input type="number" id="totalSpend" value="1500000"></div>
     <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
 
@@ -281,6 +281,7 @@
  * =================================================================== */
 const CONFIG = {
   LOGO_URL:            "kensington-logo.png", // header logo; leave "" to fall back to a gold KENSINGTON CORPORATE wordmark
+  fxUsdToCad:          1.37,     // 1 USD in CAD — used by the USD/CAD toggle; update to the current rate
   spendingRamp:        [0.80, 1.00, 1.00],  // Year 1 / 2 / 3 spend ramp
   staffCostPerTxn:     16.66,   // sales-team cost per agent / online-assisted transaction
   obtCostPerBooking:   3.50,    // OBT cost per online booking (only if OBT = Yes)
@@ -400,6 +401,7 @@ function readInputs(){
   });
   return {
     clientName:$("clientName").value,
+    currency:$("currency").value,
     totalSpend:num($("totalSpend").value),
     needsOBT:$("needsOBT").value, merchant:$("merchant").value,
     hotelCarOnly:$("hotelCarOnly").value, nonGdsPct:num($("nonGdsPct").value)/100,
@@ -540,8 +542,9 @@ function compute(inp, acContract){
 /* =================================================================== *
  *  RENDER                                                             *
  * =================================================================== */
-const fmt  = v => (v<0?'−':'') + '$'+Math.abs(Math.round(v)).toLocaleString();
-const fmtP = v => (v<0?'(':'') + '$'+Math.abs(Math.round(v)).toLocaleString() + (v<0?')':'');
+let FX = 1, CURSYM = '$';   // set per-render from the currency toggle
+const fmt  = v => { v=v*FX; return (v<0?'−':'') + CURSYM+Math.abs(Math.round(v)).toLocaleString(); };
+const fmtP = v => { v=v*FX; return (v<0?'(':'') + CURSYM+Math.abs(Math.round(v)).toLocaleString() + (v<0?')':''); };
 const pct  = v => (v*100).toFixed(1)+'%';
 
 function renderCard(el, title, res, isBest){
@@ -595,6 +598,11 @@ function renderPL(elId, base, ctr){
 
 function recalc(){
   const inp = readInputs();
+  // Currency is a display filter: the model computes in the base currency and every
+  // dollar figure is shown ×FX. Percentages and the deal itself are unchanged.
+  FX = inp.currency==='CAD' ? CONFIG.fxUsdToCad : 1;
+  CURSYM = inp.currency==='CAD' ? 'CA$' : '$';
+  const fxNote = $("fxNote"); if(fxNote) fxNote.textContent = inp.currency==='CAD' ? ('shown ×'+CONFIG.fxUsdToCad) : 'USD';
   const baseRes = compute(inp, false);   // No AC contract
   const ctrRes  = compute(inp, true);    // With AC contract
   const nb=baseRes.years[0].netProfit, nc=ctrRes.years[0].netProfit;
