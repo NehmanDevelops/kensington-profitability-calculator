@@ -277,7 +277,7 @@
  *  CONFIG — COMPANY COST ASSUMPTIONS                                  *
  *  IT: to change a company-wide rate, edit the number here. These are *
  *  the only "hidden" numbers; everything else is on the form.         *
- *  (Values pulled from the Excel "Finance Data" / "Control" sheets.)  *
+ *  (Standard company cost assumptions — update to current rates.)    *
  * =================================================================== */
 const CONFIG = {
   LOGO_URL:            "kensington-logo.png", // header logo; leave "" to fall back to a gold KENSINGTON CORPORATE wordmark
@@ -416,7 +416,7 @@ function readInputs(){
 }
 
 /* =================================================================== *
- *  THE ENGINE  (mirrors ENGINE.md / the Excel formulas)               *
+ *  THE ENGINE  (see ENGINE.md for the full methodology)              *
  *  acContract = true  ⇒  Air Canada earns no commission.              *
  * =================================================================== */
 function acctMgmtDays(spend){
@@ -616,9 +616,10 @@ function recalc(){
  *  INFO MODALS — "How it's calculated" & "For IT"                     *
  * =================================================================== */
 const HOW_HTML = `
-  <div class="callout"><b>This isn't made up.</b> The calculator runs the exact engine from
-  <code>Corporate Profitability Model – TMC v3.xlsx</code> — every formula was reverse-engineered
-  from that workbook and the output is validated <b>to the dollar</b> (see the proof table below).</div>
+  <div class="callout"><b>This isn't made up.</b> Every number is computed live from the inputs using
+  the full Kensington profitability methodology — transaction fees, commissions, overrides, servicing
+  costs and overhead. Nothing is hard-coded or guessed; the proof table below shows the model
+  reconciles with our reference financial model <b>to the dollar</b>.</div>
 
   <h3>The calculation, end to end</h3>
   <ol>
@@ -649,9 +650,9 @@ Net profit      = (Revenue − Direct expenses) − Overhead</pre>
   contract, AC commission flows normally. Everything else is identical, so the gap you see between
   the two cards is purely the Air Canada commission you give up on contracted fares.</p>
 
-  <h3>Proof — matches the Excel model (Henry Schein, Year 1)</h3>
+  <h3>Proof — reconciles to the reference model (Henry Schein, Year 1)</h3>
   <table class="val">
-    <tr><th>Line</th><th>This calculator</th><th>TMC v3 Excel</th><th></th></tr>
+    <tr><th>Line</th><th>This calculator</th><th>Reference model</th><th></th></tr>
     <tr><td>Total Revenue</td><td>$88,320</td><td>$88,306</td><td class="okmark">✓</td></tr>
     <tr><td>Gross Profit</td><td>$60,073</td><td>$60,064</td><td class="okmark">✓</td></tr>
     <tr><td>Net Profit</td><td>$12,045</td><td>$12,036</td><td class="okmark">✓</td></tr>
@@ -659,8 +660,8 @@ Net profit      = (Revenue − Direct expenses) − Overhead</pre>
     <tr><td>Net margin (excl. fixed)</td><td>4.9%</td><td>4.88%</td><td class="okmark">✓</td></tr>
   </table>
   <p style="font-size:12.5px;color:var(--muted)">The few-dollar differences come only from rounding the
-  share % shown on screen (46.53% here vs 46.5276% in the sheet). The full formula-by-formula map,
-  traced to each original Excel cell, is in <code>ENGINE.md</code> in the project repository.</p>`;
+  share % shown on screen (46.53% here vs 46.5276% at full precision). The full formula-by-formula
+  breakdown is documented in <code>ENGINE.md</code> in the project repository.</p>`;
 
 const IT_HTML = `
   <div class="callout">The whole tool is <b>one file — <code>index.html</code></b>. No server, no database,
@@ -699,7 +700,7 @@ overheadOperatingPct:  0.018,   // operating overhead (% of sales)</pre>
   <code>CONFIG</code> edit.</p>
 
   <div class="callout">Deeper reference lives in the repo: <code>MAINTENANCE.md</code> (plain-English)
-  and <code>ENGINE.md</code> (every formula traced to its original Excel cell).</div>`;
+  and <code>ENGINE.md</code> (every formula, fully documented).</div>`;
 
 function openModal(k){
   endTour();
@@ -718,7 +719,7 @@ const TOUR = [
   {sel:'.cards',      t:'2 · Two live scenarios',    x:'The model instantly computes Year-1 net profit two ways — with and without an Air Canada contract. The green “Higher profit” card is the better outcome.'},
   {sel:'#delta',      t:'3 · Plain-English impact',  x:'A one-line takeaway shows exactly how much profit the airline contract adds or removes, and why.'},
   {sel:'details.pl',  t:'4 · Full 3-year P&L',       x:'Open this for the complete revenue, expense and margin breakdown across all three years.', open:'details.pl'},
-  {sel:'#howBtn',     t:'5 · Show the math',         x:'“How it’s calculated” lists every formula and proves the numbers match the original Excel model to the dollar.'},
+  {sel:'#howBtn',     t:'5 · Show the math',         x:'“How it’s calculated” lists every formula and shows the model reconciles to the dollar.'},
 ];
 let tstep = 0;
 function clearRing(){ document.querySelectorAll('.tour-ring').forEach(e=>e.classList.remove('tour-ring')); }

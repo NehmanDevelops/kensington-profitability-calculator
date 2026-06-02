@@ -1,56 +1,55 @@
-# Profitability Engine — extracted from *Corporate Profitability Model – TMC v3.xlsx*
+# Kensington Profitability Calculator — Engine Reference
 
-This is the authoritative reference for the math behind the Kensington Profitability
-Calculator. Every formula below was reverse-engineered from the Excel workbook and
-**validated to the dollar** against the "Henry Schein Revised" example
-($1.5M spend → Net Profit Yr1 = $12,036).
+This is the authoritative reference for the math behind the calculator. Every formula
+below is documented and **validated to the dollar** against the "Henry Schein Revised"
+worked example ($1.5M spend → Year-1 Net Profit = $12,036).
 
-The Excel hides the engine across 12 sheets (2 visible, 10 hidden) and pulls airline
-percentages from pivot tables. The web calculator collapses that into one transparent
-JavaScript function — the pivot-derived percentages simply become editable inputs in
-the "Airline mix" table (which is exactly how the BD form already presents them).
+The calculator implements the full corporate profitability methodology — transaction
+fees, commissions, back-end overrides, servicing costs and overhead — in one transparent
+JavaScript function. The airline percentages the model relies on are surfaced directly as
+editable inputs in the "Airline mix" table.
 
 ---
 
 ## 1. The two scenarios
 
-| Toggle | Excel cell | Effect |
-|---|---|---|
-| **Does client book Air Canada contract rates?** | `Sales Team Data!B10` | When **Yes** → Air Canada non-commissionable % is forced to **100%** (`D46=1`, `E46=1`), so AC earns **no commission**. When **No** → AC commission flows normally. |
+| Toggle | Effect |
+|---|---|
+| **Does client book Air Canada contract rates?** | When **Yes** → Air Canada's non-commissionable share is forced to **100%**, so AC earns **no commission** (you don't earn commission on contracted fares). When **No** → AC commission flows normally. |
 
 The calculator renders **two P&L columns side by side**: *Without AC Contract* and
 *With AC Contract*. Everything else is identical between them.
 
 ---
 
-## 2. Inputs (Sales Team Data)
+## 2. Inputs
 
-| Field | Cell | Henry Schein |
-|---|---|---|
-| Total spend | `B7` (`sales`) | 1,500,000 |
-| Provides total spend data? | `B8` / unit `C8` | No / % |
-| Provides avg spend/booking? | `B9` | No |
-| Books AC contract rates? | `B10` | No |
-| Needs OBT? | `B11` | Yes |
-| Hotel-only & Car-only bookings? | `B12` | No |
-| Non-GDS add-on % | `B13` | 0% |
-| Merchant of record? | `B16` | Yes |
-| Change "Current Booking Fee"? | `B17` | No |
-| Change "Other Fee"? | `B18` (`otherfeechg`) | No |
-| Spend share % (Air-Dom/Intl/Hotel/Car) | `B22:B25` | 46.53 / 24.27 / 26.83 / 2.37 |
-| Spend share % **by BD** | `C22:C25` | 45 / 25 / 27 / 3 |
-| Spend share $ **by BD** | `D22:D25` | 300k / 300k / 100k / 800k |
-| Industry avg spend/bkg | `B28:B31` | 572.65 / 1661.55 / 511.28 / 222.47 |
-| Client avg spend/bkg | `C28:C31` | 500 / 1500 / 600 / 200 |
-| % managed: agent / online / online-assisted | `B35:D38` | 50 / 50 / 20 (all rows) |
-| Airline total-sales % (Dom, Intl) | `B46:C52` | see calculator defaults |
-| Airline **non-commissionable** % (Dom, Intl) | `D46:E52` | see defaults |
-| Airline yield % (Dom, Intl) | `B63:C69` | see defaults |
-| Hotel / Car commission yield | `B58 / B59` | 8.70% / 5.56% |
-| Hotel / Car commissionable % | `C58 / C59` | 80% / 80% |
-| Fee schedule (agent, online) standard | `B74:C79` | air 35/15, nonGDS 10/0, OA 15/0, hotel-only 20/15, car-only 20/15 |
-| Fee schedule **by BD** | `D74:E79` | 40/15, 20/5, 20/20, 15/5, 15/5 |
-| Other fees: applied?, standard, by BD | `B83:D87` | impl 500/250, s2go-imp 0/500, s2go-pnr 0/0.50, acct-mgmt 0/1500, OBT 500/500 |
+| Field | Henry Schein |
+|---|---|
+| Total spend | 1,500,000 |
+| Provides total spend data? / unit | No / % |
+| Provides avg spend/booking? | No |
+| Books AC contract rates? | No |
+| Needs OBT? | Yes |
+| Hotel-only & Car-only bookings? | No |
+| Non-GDS add-on % | 0% |
+| Merchant of record? | Yes |
+| Change "Current Booking Fee"? | No |
+| Change "Other Fee"? | No |
+| Spend share % (Air-Dom/Intl/Hotel/Car) | 46.53 / 24.27 / 26.83 / 2.37 |
+| Spend share % **by BD** | 45 / 25 / 27 / 3 |
+| Spend share $ **by BD** | 300k / 300k / 100k / 800k |
+| Industry avg spend/bkg | 572.65 / 1661.55 / 511.28 / 222.47 |
+| Client avg spend/bkg | 500 / 1500 / 600 / 200 |
+| % managed: agent / online / online-assisted | 50 / 50 / 20 (all rows) |
+| Airline total-sales % (Dom, Intl) | see calculator defaults |
+| Airline **non-commissionable** % (Dom, Intl) | see defaults |
+| Airline yield % (Dom, Intl) | see defaults |
+| Hotel / Car commission yield | 8.70% / 5.56% |
+| Hotel / Car commissionable % | 80% / 80% |
+| Fee schedule (agent, online) standard | air 35/15, nonGDS 10/0, OA 15/0, hotel-only 20/15, car-only 20/15 |
+| Fee schedule **by BD** | 40/15, 20/5, 20/20, 15/5, 15/5 |
+| Other fees: applied?, standard, by BD | impl 500/250, s2go-imp 0/500, s2go-pnr 0/0.50, acct-mgmt 0/1500, OBT 500/500 |
 
 **Booking-count base** per category `c`:
 ```
@@ -63,14 +62,14 @@ online_c       = needsOBT=="No" ? 0 : ROUND(base_c/avg_c * onlinePct_c*(1-assist
 onlineAssist_c = needsOBT=="No" ? 0 : ROUND(base_c/avg_c * onlinePct_c*assistPct_c, 0)
 total_c        = agent_c + online_c + onlineAssist_c
 ```
-(Categories: Air-Dom row 8, Air-Intl row 9, Hotel row 10, Car row 11, +Hotel-only row 12, Car-only row 13.)
+(Categories: Air-Domestic, Air-International, Hotel, Car, plus Hotel-only and Car-only.)
 
 ---
 
 ## 3. Revenue components (per year, scaled by spending% `[0.80, 1.00, 1.00]`)
 
 ```
-Commission Revenue (commrev = K22):
+Commission Revenue:
   airDomComm = Σ_airlines  airDomBase * salesDom_a  * (1-nonCommDom_a) * yieldDom_a
   airIntlComm= Σ_airlines  airIntlBase* salesIntl_a * (1-nonCommIntl_a)* yieldIntl_a
       → if AC contract: nonCommDom_AC = nonCommIntl_AC = 1  (AC commission = 0)
@@ -78,21 +77,20 @@ Commission Revenue (commrev = K22):
   carComm    = base_car   * carYield   * carCommissionable%
   commrev    = airDomComm + airIntlComm + hotelComm + carComm
 
-Service Fee Revenue (srvfeerev = N29): per category & channel
+Service Fee Revenue: per category & channel
   feeAgent  = changeBookingFee=="No" ? stdAgentFee_c  : bdAgentFee_c
   feeOnline = changeBookingFee=="No" ? stdOnlineFee_c : bdOnlineFee_c
   rev_c = agent_c*feeAgent + online_c*feeOnline + onlineAssist_c*(feeOnline + onlineAssistFee)
   srvfeerev = Σ over Air-Dom, Air-Intl, Hotel-only, Car-only
 
-Non-GDS Fee Revenue (nongdsrev = N31):
+Non-GDS Fee Revenue:
   = (totalAir+totalHotelCarOnly bookings) * nonGdsPct * nonGdsFee
 
-Override Revenue (overriderev = K37):    [back-end airline/supplier overrides]
-  = airBase*(shareAirDom+shareAirIntl-normalized)*overrideAirPct
-  + base_hotel*overrideHotelPct + base_car*overrideCarPct
+Override Revenue:    [back-end airline/supplier overrides]
+  = airBase * overrideAirPct  +  base_hotel*overrideHotelPct + base_car*overrideCarPct
   (override %: air 1.5%, hotel 0%, car 2%)
 
-GDS Override Revenue (gdsoverriderev = K44):
+GDS Override Revenue:
   = (totalAirDomBkgs*gdsSegPerDom + totalAirIntlBkgs*gdsSegPerIntl) * gdsOverridePerSegment
   (2.5 segs/dom bkg, 5.5 segs/intl bkg, $1.65/segment)
 
@@ -141,13 +139,13 @@ Growth Margin % (excl overrides) = (TotalRevenue − overrideRev) / TotalSales  
 Growth Margin % (incl overrides) =  TotalRevenue / TotalSales                  target 8.0%
 Net Margin %    (excl fixed)     =  GrossProfit  / TotalSales                  target 5.75%
 ```
-Outcome ≥ target → green; below → gold/amber (mirrors the Excel "Outcome" block).
+Outcome ≥ target → green; below → gold/amber.
 
 ---
 
 ## 6. Validation (Henry Schein, Year 1 @ 80% spend, No AC contract)
 
-| Line | Engine | Excel |
+| Line | Calculator | Reference model |
 |---|---|---|
 | Total Sales | 1,231,488 | 1,231,488 ✓ |
 | Total Revenue | 88,306 | 88,306 ✓ |

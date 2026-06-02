@@ -8,7 +8,7 @@ server, no database. The whole calculator is one file you can edit in Notepad.
 | File | What it is |
 |---|---|
 | `kensington-profitability-calculator.html` | **The app.** Open it in any browser. Self-contained — HTML + CSS + JavaScript in one file. |
-| `ENGINE.md` | Plain-English reference for every formula, traced back to the original Excel cells. Read this if you need to understand *why* a number is what it is. |
+| `ENGINE.md` | Plain-English reference for every formula in the model. Read this if you need to understand *why* a number is what it is. |
 | `MAINTENANCE.md` | This file. |
 | `.preview-server.ps1`, `.claude/` | Dev-only helpers for previewing inside the editor. **Not needed to run the app** — you can delete them. |
 
@@ -23,8 +23,8 @@ Open `kensington-profitability-calculator.html` in a text editor. There are two 
 labelled blocks near the bottom, inside `<script>`:
 
 ### 1. `CONFIG` — company-wide cost assumptions
-These are the only numbers **not** shown on the form (they came from the hidden Excel
-"Finance Data" / "Control" sheets). Each line has a comment. Examples:
+These are the only numbers **not** shown on the form (standard company cost
+assumptions). Each line has a comment. Examples:
 
 ```js
 staffCostPerTxn:     16.66,   // sales-team cost per agent / online-assisted transaction
@@ -56,11 +56,11 @@ Edit the 6 colour variables at the very top of the file under `:root{ ... }`
 ## Sanity check after any change
 
 Open the file, expand the form sections, and confirm the **Henry Schein** defaults still
-produce **Year-1 Net Profit ≈ $12,045** (no contract). That figure matches the original
-Excel model ($12,036; the few-dollar gap is rounding of the on-screen share %). If it's
-wildly off, you changed something in `CONFIG` — undo it.
+produce **Year-1 Net Profit ≈ $12,045** (no contract). That figure reconciles to the
+reference financial model ($12,036; the few-dollar gap is rounding of the on-screen
+share %). If it's wildly off, you changed something in `CONFIG` — undo it.
 
-## To re-derive from a new Excel version
+## To refresh the cost assumptions
 
-If Finance updates the master Excel model, the formula map in `ENGINE.md` tells you which
-cells feed which CONFIG values, so you can refresh the constants.
+If Finance updates the standard rates, `ENGINE.md` documents which `CONFIG` value drives
+which line of the model, so you can refresh the constants in one place.
