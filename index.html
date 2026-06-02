@@ -672,8 +672,16 @@ Net profit      = (Revenue − Direct expenses) − Overhead</pre>
   breakdown is documented in <code>ENGINE.md</code> in the project repository.</p>`;
 
 const IT_HTML = `
-  <div class="callout">The whole tool is <b>one file — <code>index.html</code></b>. No server, no database,
-  no build step. Open it in any browser; deploy it by dropping it on any static host.</div>
+  <div class="callout">The whole tool is <b>one file — <code>index.html</code></b> — no server, no
+  database, no build step. The source of truth lives in <b>GitHub</b>, and <b>Vercel</b> hosts the
+  live site straight from it.</div>
+
+  <h3>Where it lives</h3>
+  <ul>
+    <li><b>Code (GitHub):</b> <code>github.com/NehmanDevelops/kensington-profitability-calculator</code></li>
+    <li><b>Live site (Vercel):</b> auto-deploys from the <code>main</code> branch — every push goes live in ~20 seconds.</li>
+    <li><b>Docs in the repo:</b> <code>README.md</code>, <code>MAINTENANCE.md</code> (plain-English) and <code>ENGINE.md</code> (every formula).</li>
+  </ul>
 
   <h3>1 · Change a company cost rate</h3>
   <p>Open <code>index.html</code> and find the <code>CONFIG</code> block near the bottom (inside the
@@ -694,13 +702,14 @@ overheadOperatingPct:  0.018,   // operating overhead (% of sales)</pre>
   <pre>LOGO_URL: "kensington-logo.png",  // your logo file; "" = text wordmark</pre>
   <p>Drop a new image next to <code>index.html</code> and point <code>LOGO_URL</code> at it.</p>
 
-  <h3>4 · Publish an update (Vercel)</h3>
+  <h3>4 · Publish an update</h3>
   <ol>
-    <li>Edit <code>index.html</code> (and/or swap the logo file).</li>
-    <li>Commit &amp; push: <code>git add -A &amp;&amp; git commit -m "update" &amp;&amp; git push</code></li>
-    <li>Vercel auto-redeploys in ~20 seconds — nothing else to do.</li>
+    <li>Edit <code>index.html</code> in the GitHub repo — directly on github.com, or clone it, edit, and push.</li>
+    <li>Commit &amp; push to <code>main</code>: <code>git add -A &amp;&amp; git commit -m "update" &amp;&amp; git push</code></li>
+    <li>Vercel auto-redeploys from GitHub in ~20 seconds — nothing else to do.</li>
   </ol>
-  <p>For a one-off with no Git, you can also just drag <code>index.html</code> into the Vercel dashboard.</p>
+  <p>No Vercel dashboard work is needed after the first setup — the live site always reflects the
+  latest commit on <code>main</code> in the GitHub repo above.</p>
 
   <h3>5 · Sanity check after any change</h3>
   <p>Load the tool with the default <b>Henry Schein</b> example and confirm Year-1 net profit

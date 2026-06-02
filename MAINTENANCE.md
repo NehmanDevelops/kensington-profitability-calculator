@@ -3,6 +3,15 @@
 **For whoever maintains this after the original author leaves.** No build tools, no
 server, no database. The whole calculator is one file you can edit in Notepad.
 
+## Where it lives
+
+- **Code (GitHub):** https://github.com/NehmanDevelops/kensington-profitability-calculator
+- **Live site (Vercel):** auto-deploys from the `main` branch — every push to GitHub goes live in ~20 seconds.
+
+The repo is the source of truth. In the repo the app file is named `index.html` (so Vercel
+serves it automatically); in this working folder it's `kensington-profitability-calculator.html` —
+same file.
+
 ## What the files are
 
 | File | What it is |
