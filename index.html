@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kensington — Profitability Calculator</title>
+<style>
+  /* ============================================================= *
+   *  BRANDING — IT can change these to re-skin the app            *
+   * ============================================================= */
+  :root{
+    --brand:#0e6e5c;        /* primary accent                       */
+    --brand-2:#0a5648;      /* darker accent                        */
+    --ink:#10212e;          /* main text                            */
+    --muted:#6a7885;        /* secondary text                       */
+    --good:#15924f;         /* meets target                         */
+    --warn:#c4881f;         /* below target                         */
+    --bg:#f3f5f7; --card:#ffffff; --soft:#f7f9fa; --line:#e6ebef;
+    --font:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14.5px;line-height:1.5}
+  .topbar{display:flex;align-items:center;gap:12px;padding:18px 26px;background:#fff;border-bottom:1px solid var(--line)}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px}
+  .topbar h1{margin:0;font-size:16px;font-weight:650;letter-spacing:.2px}
+  .topbar .sub{margin-left:auto;color:var(--muted);font-size:13px}
+
+  .wrap{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:26px;max-width:1320px;margin:26px auto;padding:0 26px;align-items:start}
+  @media(max-width:940px){.wrap{grid-template-columns:1fr;margin:18px auto}}
+
+  /* ---------- form ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  .panel-h{padding:16px 20px 6px;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}
+  .row{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--soft)}
+  .row:last-child{border-bottom:none}
+  .row label{flex:1;font-weight:500}
+  .row label .hint{display:block;color:var(--muted);font-size:11.5px;font-weight:400;margin-top:1px}
+  input,select{font-family:var(--font);font-size:14px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:130px;text-align:right;transition:border-color .15s,box-shadow .15s}
+  select{width:auto;text-align:left;cursor:pointer}
+  input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,110,92,.13)}
+  details.adv{border-top:1px solid var(--line)}
+  details.adv>summary{padding:13px 20px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink);list-style:none;display:flex;align-items:center;gap:8px}
+  details.adv>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;margin-left:2px}
+  details.adv[open]>summary::before{transform:rotate(45deg)}
+  details.adv .inner{padding:2px 20px 16px}
+  table.grid{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  table.grid th,table.grid td{padding:5px 6px;text-align:right}
+  table.grid th{color:var(--muted);font-weight:600;text-align:center;font-size:11px;border-bottom:1px solid var(--line)}
+  table.grid td:first-child,table.grid th:first-child{text-align:left}
+  table.grid input{width:60px;padding:5px 6px;font-size:12.5px;border-radius:8px}
+  table.grid select{padding:5px 6px;font-size:12.5px}
+  .mininote{font-size:12px;color:var(--muted);margin:4px 0 2px}
+
+  /* ---------- results ---------- */
+  .results{position:sticky;top:20px;display:flex;flex-direction:column;gap:18px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.cards{grid-template-columns:1fr}}
+  .rcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;transition:border-color .15s,box-shadow .15s}
+  .rcard.best{border:1.5px solid var(--brand);box-shadow:0 6px 22px -10px rgba(14,110,92,.45)}
+  .rcard .name{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+  .rcard .tag{position:absolute;top:16px;right:16px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--soft);color:var(--muted)}
+  .rcard.best .tag{background:var(--brand);color:#fff}
+  .rcard .np{font-size:33px;font-weight:750;letter-spacing:-.5px;margin:10px 0 2px;font-variant-numeric:tabular-nums}
+  .rcard .np.neg{color:var(--warn)}
+  .rcard .nplabel{font-size:12px;color:var(--muted)}
+  .rcard .mini{margin-top:16px;padding-top:14px;border-top:1px solid var(--soft);display:flex;flex-direction:column;gap:9px}
+  .mini .m{display:flex;align-items:center;gap:9px;font-size:12.5px}
+  .mini .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .mini .dot.ok{background:var(--good)} .mini .dot.under{background:var(--warn)}
+  .mini .ml{color:var(--muted);flex:1}
+  .mini .mv{font-weight:700;font-variant-numeric:tabular-nums}
+
+  .takeaway{background:linear-gradient(135deg,#0e6e5c,#0a5648);color:#fff;border-radius:var(--radius);padding:18px 22px;font-size:14.5px;line-height:1.55}
+  .takeaway .big{font-size:15px;font-weight:650;display:block;margin-bottom:3px}
+  .takeaway b{font-weight:750}
+
+  details.pl{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  details.pl>summary{padding:15px 22px;cursor:pointer;font-weight:650;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  details.pl>summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+  details.pl[open]>summary::before{transform:rotate(45deg)}
+  .pl-wrap{padding:0 16px 14px;overflow-x:auto}
+  table.pl{width:100%;border-collapse:collapse;min-width:520px}
+  table.pl td{padding:7px 12px;border-bottom:1px solid var(--soft);font-size:13px}
+  table.pl td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.pl tr.head td{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px;text-align:right;border-bottom:1px solid var(--line)}
+  table.pl tr.section td{font-weight:700;color:var(--brand-2);padding-top:13px;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+  table.pl tr.total td{font-weight:700;border-top:1px solid var(--line)}
+  table.pl tr.net td{font-weight:750;background:var(--soft)}
+  .neg{color:#b4452f}
+  .foot{max-width:1320px;margin:6px auto 30px;padding:0 26px;color:var(--muted);font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">K</div>
+  <h1>Profitability Calculator</h1>
+  <span class="sub">Kensington · with vs. without an airline contract</span>
+</div>
+
+<div class="wrap">
+  <!-- ============================ INPUTS ============================ -->
+  <div class="panel" id="inputs">
+    <div class="panel-h">Client &amp; deal</div>
+    <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
+    <div class="row"><label>Total annual spend ($)</label><input type="number" id="totalSpend" value="1500000"></div>
+    <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
+    <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
+
+    <details class="adv">
+      <summary>Assumptions</summary>
+      <div class="inner">
+        <div class="row" style="padding-left:0;padding-right:0"><label>Hotel-only &amp; car-only bookings?</label><select id="hotelCarOnly"><option>No</option><option>Yes</option></select></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Non-GDS add-on booking %</label><input type="number" id="nonGdsPct" value="0" step="0.5"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Client provides total spend data?</label><select id="providesSpend"><option>No</option><option>Yes</option></select></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>…by % or $</label><select id="spendUnit"><option>%</option><option>$</option></select></div>
+        <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Client provides avg spend/booking?</label><select id="providesAvg"><option>No</option><option>Yes</option></select></div>
+      </div>
+    </details>
+
+    <details class="adv">
+      <summary>Spend share &amp; bookings</summary>
+      <div class="inner">
+        <table class="grid" id="shareTable">
+          <tr><th>Category</th><th>Share %</th><th>BD %</th><th>BD $</th><th>Ind. avg</th><th>Client avg</th></tr>
+        </table>
+        <table class="grid" id="mgmtTable" style="margin-top:12px">
+          <tr><th>% Managed</th><th>Agent %</th><th>Online %</th><th>Online-asst %</th></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="adv">
+      <summary>Airline mix &amp; yields</summary>
+      <div class="inner">
+        <p class="mininote">Air Canada commission becomes $0 in the "With Contract" scenario.</p>
+        <table class="grid" id="airTable">
+          <tr><th>Airline</th><th>Sales Dom</th><th>Sales Int'l</th><th>NC Dom</th><th>NC Int'l</th><th>Yld Dom</th><th>Yld Int'l</th></tr>
+        </table>
+        <table class="grid" id="hcYield" style="margin-top:12px">
+          <tr><th>&nbsp;</th><th>Yield %</th><th>Commissionable %</th></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="adv">
+      <summary>Fee schedule</summary>
+      <div class="inner">
+        <div class="row" style="padding-left:0;padding-right:0"><label>BD changes the booking fee?</label><select id="changeBookingFee"><option>No</option><option>Yes</option></select></div>
+        <table class="grid" id="feeTable">
+          <tr><th>Fee</th><th>Agent std</th><th>Online std</th><th>Agent BD</th><th>Online BD</th></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="adv">
+      <summary>Other fees</summary>
+      <div class="inner">
+        <div class="row" style="padding-left:0;padding-right:0"><label>BD changes the "other" fees?</label><select id="changeOtherFee"><option>No</option><option>Yes</option></select></div>
+        <table class="grid" id="otherFeeTable">
+          <tr><th>Fee</th><th>Applied?</th><th>Std $</th><th>BD $</th></tr>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <!-- ============================ RESULTS ============================ -->
+  <div class="results">
+    <div class="cards">
+      <div class="rcard" id="scnBase"></div>
+      <div class="rcard" id="scnContract"></div>
+    </div>
+    <div class="takeaway" id="delta"></div>
+    <details class="pl">
+      <summary>Show full 3-year P&amp;L breakdown</summary>
+      <div class="pl-wrap" id="plDetail"></div>
+    </details>
+  </div>
+</div>
+<div class="foot">Model reverse-engineered &amp; validated against <i>Corporate Profitability Model – TMC v3.xlsx</i>. Company cost assumptions live in the <code>CONFIG</code> block at the top of this file — see <code>MAINTENANCE.md</code>.</div>
+
+<script>
+/* =================================================================== *
+ *  CONFIG — COMPANY COST ASSUMPTIONS                                  *
+ *  IT: to change a company-wide rate, edit the number here. These are *
+ *  the only "hidden" numbers; everything else is on the form.         *
+ *  (Values pulled from the Excel "Finance Data" / "Control" sheets.)  *
+ * =================================================================== */
+const CONFIG = {
+  spendingRamp:        [0.80, 1.00, 1.00],  // Year 1 / 2 / 3 spend ramp
+  staffCostPerTxn:     16.66,   // sales-team cost per agent / online-assisted transaction
+  obtCostPerBooking:   3.50,    // OBT cost per online booking (only if OBT = Yes)
+  obtImplCost:         1000,    // one-time OBT implementation cost (Year 1, if OBT = Yes)
+  cost247PerBooking:   5.00,    // 24/7 service cost per total booking
+  merchantFeePct:      0.032,   // merchant processing fee (only if merchant of record = Yes)
+  acctMgmtDailyRate:   493.2339,// loaded daily cost of an account manager
+  acctMgmtDayTiers:    [        // recommended account-mgmt days by total spend
+    {min:1000000, days:14.5}, {min:500000, days:6}, {min:0, days:1.5} ],
+  overrideAirPct:      0.015,   // back-end air override %
+  overrideHotelPct:    0.00,    // back-end hotel override %
+  overrideCarPct:      0.02,    // back-end car override %
+  gdsOverridePerSeg:   1.65,    // GDS override $ per segment
+  gdsSegPerAirDom:     2.5,     // GDS segments per air-domestic booking
+  gdsSegPerAirIntl:    5.5,     // GDS segments per air-international booking
+  overheadMarketingPct:0.012,   // overhead: marketing  (% of total sales)
+  overheadOperatingPct:0.018,   // overhead: operating  (% of total sales)
+  overheadBackOfficePct:0.009,  // overhead: back office (% of total sales)
+  onlineAssistFee:     15,      // extra fee added on an online-assisted booking
+  target: { growthExcl:0.065, growthIncl:0.08, netExclFixed:0.0575 }, // outcome targets
+};
+
+/* =================================================================== *
+ *  DEFAULTS — pre-fill the form with the Henry Schein example.        *
+ * =================================================================== */
+const CATS = ["Air - Domestic","Air - International","Hotel","Car"];
+const DEF = {
+  share:   [46.53,24.27,26.83,2.37],
+  shareBD: [45,25,27,3],
+  shareBD$:[300000,300000,100000,800000],
+  indAvg:  [572.65,1661.55,511.28,222.47],
+  cliAvg:  [500,1500,600,200],
+  agentPct:[50,50,50,50], onlinePct:[50,50,50,50], assistPct:[20,20,20,20],
+  airlines:[
+    // name, salesDom%, salesIntl%, nonCommDom%, nonCommIntl%, yieldDom%, yieldIntl%
+    ["Air Canada",        25,40,14.63,33.44,3.72,3.66],
+    ["American Airlines", 50,48,96.42,65.02,1.83,9.69],
+    ["Delta Airlines",    20,10,97.74,46.47,9.40,8.27],
+    ["Southwest Airlines", 0, 0,99.96,100.0,0.00,0.00],
+    ["United Airlines",    0, 0,92.93,42.37,4.89,6.02],
+    ["WestJet Airlines",   0, 0,38.49,14.03,3.71,5.59],
+    ["Other",              5, 2,70.18,45.55,3.30,6.95],
+  ],
+  hcYield: { hotelYield:8.70, hotelComm:80, carYield:5.56, carComm:80 },
+  // fee rows: label, agentStd, onlineStd, agentBD, onlineBD
+  fees:[
+    ["Air - Domestic",35,15,40,15],
+    ["Air - International",35,15,40,15],
+    ["Non-GDS add on",10,0,20,5],
+    ["Online Assisted",15,0,20,20],
+    ["Hotel Only",20,15,15,5],
+    ["Car Only",20,15,15,5],
+  ],
+  // other fees: label, applied, standard, bd
+  other:[
+    ["Implementation Fee","Yes",500,250],
+    ["Safe to Go Imp Fee","No",0,500],
+    ["Safe to Go (per PNR)","No",0,0.50],
+    ["Account Management Fee","No",0,1500],
+    ["OBT Imp Fee","Yes",500,500],
+  ],
+};
+
+/* ---------- build the editable tables from DEF ---------- */
+const $ = id => document.getElementById(id);
+function num(v){ return parseFloat(v)||0; }
+function cellInput(val,cls){ return `<input class="${cls||''}" type="number" step="any" value="${val}">`; }
+
+(function build(){
+  let s=$("shareTable");
+  CATS.forEach((c,i)=> s.insertAdjacentHTML("beforeend",
+    `<tr><td>${c}</td><td>${cellInput(DEF.share[i],'i-share')}</td><td>${cellInput(DEF.shareBD[i],'i-shareBD')}</td>
+     <td>${cellInput(DEF['shareBD$'][i],'i-shareBDd')}</td><td>${cellInput(DEF.indAvg[i],'i-indAvg')}</td><td>${cellInput(DEF.cliAvg[i],'i-cliAvg')}</td></tr>`));
+  let m=$("mgmtTable");
+  CATS.forEach((c,i)=> m.insertAdjacentHTML("beforeend",
+    `<tr><td>${c}</td><td>${cellInput(DEF.agentPct[i],'i-agent')}</td><td>${cellInput(DEF.onlinePct[i],'i-online')}</td><td>${cellInput(DEF.assistPct[i],'i-assist')}</td></tr>`));
+  let a=$("airTable");
+  DEF.airlines.forEach((r,i)=> a.insertAdjacentHTML("beforeend",
+    `<tr data-air="${i}"><td>${r[0]}</td>${r.slice(1).map((v,j)=>`<td>${cellInput(v,'a-'+j)}</td>`).join("")}</tr>`));
+  let h=$("hcYield");
+  h.insertAdjacentHTML("beforeend",`<tr><td>Hotel</td><td>${cellInput(DEF.hcYield.hotelYield,'hy')}</td><td>${cellInput(DEF.hcYield.hotelComm,'hc')}</td></tr>`);
+  h.insertAdjacentHTML("beforeend",`<tr><td>Car</td><td>${cellInput(DEF.hcYield.carYield,'cy')}</td><td>${cellInput(DEF.hcYield.carComm,'cc')}</td></tr>`);
+  let f=$("feeTable");
+  DEF.fees.forEach((r,i)=> f.insertAdjacentHTML("beforeend",
+    `<tr data-fee="${i}"><td>${r[0]}</td>${r.slice(1).map((v,j)=>`<td>${cellInput(v,'f-'+j)}</td>`).join("")}</tr>`));
+  let o=$("otherFeeTable");
+  DEF.other.forEach((r,i)=> o.insertAdjacentHTML("beforeend",
+    `<tr data-other="${i}"><td>${r[0]}</td>
+      <td><select class="o-applied" style="width:58px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
+      <td>${cellInput(r[2],'o-std')}</td><td>${cellInput(r[3],'o-bd')}</td></tr>`));
+})();
+
+/* ---------- read the whole form into one object ---------- */
+function readInputs(){
+  const col=(cls)=>[...document.querySelectorAll('.'+cls)].map(e=>num(e.value));
+  const airlines = DEF.airlines.map((_,i)=>{
+    const tds=document.querySelectorAll(`#airTable tr[data-air="${i}"] input`);
+    return {name:DEF.airlines[i][0],
+      salesDom:num(tds[0].value)/100, salesIntl:num(tds[1].value)/100,
+      nonCommDom:num(tds[2].value)/100, nonCommIntl:num(tds[3].value)/100,
+      yieldDom:num(tds[4].value)/100, yieldIntl:num(tds[5].value)/100};
+  });
+  const fees = DEF.fees.map((_,i)=>{
+    const t=document.querySelectorAll(`#feeTable tr[data-fee="${i}"] input`);
+    return {agentStd:num(t[0].value),onlineStd:num(t[1].value),agentBD:num(t[2].value),onlineBD:num(t[3].value)};
+  });
+  const other = DEF.other.map((_,i)=>{
+    const r=document.querySelector(`#otherFeeTable tr[data-other="${i}"]`);
+    return {applied:r.querySelector('.o-applied').value, std:num(r.querySelector('.o-std').value), bd:num(r.querySelector('.o-bd').value)};
+  });
+  return {
+    clientName:$("clientName").value,
+    totalSpend:num($("totalSpend").value),
+    needsOBT:$("needsOBT").value, merchant:$("merchant").value,
+    hotelCarOnly:$("hotelCarOnly").value, nonGdsPct:num($("nonGdsPct").value)/100,
+    providesSpend:$("providesSpend").value, spendUnit:$("spendUnit").value, providesAvg:$("providesAvg").value,
+    changeBookingFee:$("changeBookingFee").value, changeOtherFee:$("changeOtherFee").value,
+    share:col('i-share').map(x=>x/100), shareBD:col('i-shareBD').map(x=>x/100), shareBD$:col('i-shareBDd'),
+    indAvg:col('i-indAvg'), cliAvg:col('i-cliAvg'),
+    agentPct:col('i-agent').map(x=>x/100), onlinePct:col('i-online').map(x=>x/100), assistPct:col('i-assist').map(x=>x/100),
+    airlines,
+    hotelYield:num(document.querySelector('.hy').value)/100, hotelComm:num(document.querySelector('.hc').value)/100,
+    carYield:num(document.querySelector('.cy').value)/100, carComm:num(document.querySelector('.cc').value)/100,
+    fees, other,
+  };
+}
+
+/* =================================================================== *
+ *  THE ENGINE  (mirrors ENGINE.md / the Excel formulas)               *
+ *  acContract = true  ⇒  Air Canada earns no commission.              *
+ * =================================================================== */
+function acctMgmtDays(spend){
+  for(const t of CONFIG.acctMgmtDayTiers) if(spend>=t.min) return t.days;
+  return 0;
+}
+function compute(inp, acContract){
+  const R = Math.round;
+  const base = CATS.map((_,i)=>
+    inp.providesSpend==="Yes"
+      ? (inp.spendUnit==="%" ? inp.totalSpend*inp.shareBD[i] : inp.shareBD$[i])
+      : inp.totalSpend*inp.share[i]);
+  const avg  = CATS.map((_,i)=> inp.providesAvg==="No" ? inp.indAvg[i] : inp.cliAvg[i]);
+
+  const obt = inp.needsOBT==="Yes";
+  const bk = CATS.map((_,i)=>{
+    const per = avg[i]>0 ? base[i]/avg[i] : 0;
+    const agent  = R(per*inp.agentPct[i]);
+    const online = obt ? R(per*inp.onlinePct[i]*(1-inp.assistPct[i])) : 0;
+    const assist = obt ? R(per*inp.onlinePct[i]*inp.assistPct[i]) : 0;
+    return {agent, online, assist, total:agent+online+assist};
+  });
+  const hcOn = inp.hotelCarOnly==="Yes";
+  const hcOnly = [
+    hcOn ? {agent:R(bk[2].agent*0.10),online:R(bk[2].online*0.45),assist:R(bk[2].assist*0.05)} : {agent:0,online:0,assist:0},
+    hcOn ? {agent:R(bk[3].agent*0.05),online:R(bk[3].online*0.45),assist:R(bk[3].assist*0.05)} : {agent:0,online:0,assist:0},
+  ].map(o=>({...o,total:o.agent+o.online+o.assist}));
+
+  // COMMISSION
+  let airDomComm=0, airIntlComm=0;
+  for(const a of inp.airlines){
+    let ncD=a.nonCommDom, ncI=a.nonCommIntl;
+    if(acContract && a.name==="Air Canada"){ ncD=1; ncI=1; }
+    airDomComm  += base[0]*a.salesDom *(1-ncD)*a.yieldDom;
+    airIntlComm += base[1]*a.salesIntl*(1-ncI)*a.yieldIntl;
+  }
+  const hotelComm = base[2]*inp.hotelYield*inp.hotelComm;
+  const carComm   = base[3]*inp.carYield  *inp.carComm;
+  const commrev = airDomComm + airIntlComm + hotelComm + carComm;
+
+  // SERVICE FEE REVENUE
+  const chg = inp.changeBookingFee==="Yes";
+  const fAgent = i=> chg ? inp.fees[i].agentBD : inp.fees[i].agentStd;
+  const fOnline= i=> chg ? inp.fees[i].onlineBD: inp.fees[i].onlineStd;
+  const oaFee  = CONFIG.onlineAssistFee;
+  function svc(b, feeIdx){ return b.agent*fAgent(feeIdx) + b.online*fOnline(feeIdx) + b.assist*(fOnline(feeIdx)+oaFee); }
+  const srvfeerev = svc(bk[0],0) + svc(bk[1],1) + svc(hcOnly[0],4) + svc(hcOnly[1],5);
+
+  // NON-GDS FEE REVENUE
+  const nonGdsFee = chg ? inp.fees[2].agentBD : inp.fees[2].agentStd;
+  const airTotalBkgs = bk[0].total + bk[1].total + hcOnly[0].total + hcOnly[1].total;
+  const nongdsrev = airTotalBkgs * inp.nonGdsPct * nonGdsFee;
+
+  // OVERRIDES
+  const overriderev = base[0]*CONFIG.overrideAirPct + base[1]*CONFIG.overrideAirPct
+                    + base[2]*CONFIG.overrideHotelPct + base[3]*CONFIG.overrideCarPct;
+  const gdsoverriderev = (bk[0].total*CONFIG.gdsSegPerAirDom + bk[1].total*CONFIG.gdsSegPerAirIntl)*CONFIG.gdsOverridePerSeg;
+
+  // OTHER FEES
+  const O = inp.other, co = inp.changeOtherFee==="Yes";
+  const otherFee = (i)=> co ? (O[i].applied==="No" ? 0 : O[i].bd) : O[i].std;
+  const implFee   = otherFee(0);
+  const s2goImp   = otherFee(1);
+  const s2goPnrFee= co ? (O[2].applied==="No"?0:O[2].bd) : O[2].std;
+  const acctFee   = otherFee(3);
+  const obtImpFee = obt ? otherFee(4) : 0;
+
+  const s2goPnrBkgs = bk[0].total + bk[1].total;
+  const s2goPnrRev  = s2goPnrFee * s2goPnrBkgs;
+  const s2goPnrCost = 0;
+
+  // COST DRIVERS
+  const staffTxns = bk[0].agent+bk[1].agent+hcOnly[0].agent+hcOnly[1].agent
+                  + bk[0].assist+bk[1].assist+hcOnly[0].assist+hcOnly[1].assist;
+  const salesTeamCost = CONFIG.staffCostPerTxn * staffTxns;
+  const obtOnlineBkgs = bk[0].online+bk[1].online+hcOnly[0].online+hcOnly[1].online;
+  const obtAnnualCost = obt ? CONFIG.obtCostPerBooking * obtOnlineBkgs : 0;
+  const totalAllBkgs  = bk[0].total+bk[1].total+bk[2].total+bk[3].total;
+  const cost247       = CONFIG.cost247PerBooking * totalAllBkgs;
+  const acctMgmtCost  = CONFIG.acctMgmtDailyRate * (acctMgmtDays(inp.totalSpend)/2);
+
+  // BUILD 3-YEAR P&L
+  const years = CONFIG.spendingRamp.map((sp, y)=>{
+    const isY1 = y===0;
+    const catSales = base.reduce((a,_,i)=> a + inp.totalSpend*inp.share[i]*sp, 0);
+    const rCommission = commrev*sp;
+    const rService    = srvfeerev*sp;
+    const rNonGds     = nongdsrev*sp;
+    const rImpl       = isY1 ? implFee  : 0;
+    const rS2goImp    = isY1 ? s2goImp  : 0;
+    const rS2goPnr    = s2goPnrRev*sp;
+    const rObtImp     = isY1 ? obtImpFee: 0;
+    const rAcct       = acctFee;
+    const rOverride   = (overriderev + gdsoverriderev)*sp;
+    const feeRevenue  = rService + rNonGds + rImpl + rS2goImp + rS2goPnr + rObtImp + rAcct;
+    const totalSales  = catSales + feeRevenue;
+    const totalRevenue= rCommission + feeRevenue + rOverride;
+    const eSales   = -salesTeamCost*sp;
+    const eObt     = -obtAnnualCost*sp;
+    const eObtImp  = isY1 ? -(obt?CONFIG.obtImplCost:0) : 0;
+    const eS2goPnr = -s2goPnrCost*sp;
+    const eAcct    = -acctMgmtCost;
+    const e247     = -cost247*sp;
+    const eMerchant= inp.merchant==="Yes" ? -feeRevenue*CONFIG.merchantFeePct : 0;
+    const directExp= eSales+eObt+eObtImp+eS2goPnr+eAcct+e247+eMerchant;
+    const grossProfit = totalRevenue + directExp;
+    const ovh = -totalSales*(CONFIG.overheadMarketingPct+CONFIG.overheadOperatingPct+CONFIG.overheadBackOfficePct);
+    const netProfit = grossProfit + ovh;
+    return {
+      sp, catSales, rCommission, rService, rNonGds, rImpl, rS2goImp, rS2goPnr, rObtImp, rAcct, rOverride,
+      feeRevenue, totalSales, totalRevenue,
+      eSales,eObt,eObtImp,eS2goPnr,eAcct,e247,eMerchant,directExp,grossProfit,ovh,netProfit,
+      mGrowthExcl:(totalRevenue-rOverride)/totalSales,
+      mGrowthIncl:totalRevenue/totalSales,
+      mNetExcl:grossProfit/totalSales,
+    };
+  });
+  return {years};
+}
+
+/* =================================================================== *
+ *  RENDER                                                             *
+ * =================================================================== */
+const fmt  = v => (v<0?'−':'') + '$'+Math.abs(Math.round(v)).toLocaleString();
+const fmtP = v => (v<0?'(':'') + '$'+Math.abs(Math.round(v)).toLocaleString() + (v<0?')':'');
+const pct  = v => (v*100).toFixed(1)+'%';
+
+function renderCard(el, title, res, isBest){
+  const y1 = res.years[0];
+  const np = y1.netProfit;
+  const mm = (lbl,val,target)=>{
+    const ok = val>=target;
+    return `<div class="m"><span class="dot ${ok?'ok':'under'}"></span><span class="ml">${lbl}</span><span class="mv">${pct(val)}</span></div>`;
+  };
+  el.className = 'rcard'+(isBest?' best':'');
+  el.innerHTML = `
+    <div class="tag">${isBest?'Higher profit':'Lower profit'}</div>
+    <div class="name">${title}</div>
+    <div class="np ${np<0?'neg':''}">${fmt(np)}</div>
+    <div class="nplabel">Year 1 net profit</div>
+    <div class="mini">
+      ${mm('Growth margin (incl. overrides)', y1.mGrowthIncl, CONFIG.target.growthIncl)}
+      ${mm('Net margin (excl. fixed)', y1.mNetExcl, CONFIG.target.netExclFixed)}
+    </div>`;
+}
+
+function renderPL(elId, base, ctr){
+  const B=base.years, C=ctr.years;
+  const r=(label,k,cls)=>`<tr class="${cls||''}"><td>${label}</td>`+
+    [0,1,2].map(y=>{const v=B[y][k];return `<td class="num ${v<0?'neg':''}">${fmtP(v)}</td>`}).join('')+`</tr>`;
+  // show the "without contract" P&L (full); contract differs only in commission
+  $(elId).innerHTML = `<table class="pl">
+    <tr class="head"><td>Without AC contract</td><td class="num">Year 1</td><td class="num">Year 2</td><td class="num">Year 3</td></tr>
+    ${r('Total Sales','totalSales','total')}
+    <tr class="section"><td colspan="4">Revenue</td></tr>
+    ${r('Commission','rCommission')}
+    ${r('Service fees','rService')}
+    ${r('Non-GDS fees','rNonGds')}
+    ${r('Implementation','rImpl')}
+    ${r('OBT implementation','rObtImp')}
+    ${r('Account mgmt fee','rAcct')}
+    ${r('Back-end overrides','rOverride')}
+    ${r('Total Revenue','totalRevenue','total')}
+    <tr class="section"><td colspan="4">Direct expenses</td></tr>
+    ${r('Sales team','eSales')}
+    ${r('OBT cost','eObt')}
+    ${r('OBT impl cost','eObtImp')}
+    ${r('Account mgmt','eAcct')}
+    ${r('24/7 service','e247')}
+    ${r('Merchant fees','eMerchant')}
+    ${r('Total Direct Expenses','directExp','total')}
+    ${r('Gross Profit','grossProfit','total')}
+    ${r('Total Overhead','ovh')}
+    ${r('Net Profit','netProfit','net')}
+  </table>`;
+}
+
+function recalc(){
+  const inp = readInputs();
+  const baseRes = compute(inp, false);   // No AC contract
+  const ctrRes  = compute(inp, true);    // With AC contract
+  const nb=baseRes.years[0].netProfit, nc=ctrRes.years[0].netProfit;
+
+  renderCard($("scnBase"),     "Without AC contract", baseRes, nb>=nc);
+  renderCard($("scnContract"), "With AC contract",    ctrRes,  nc>nb);
+
+  const diff = Math.abs(nb-nc);
+  const better = nb>=nc ? "without" : "with";
+  $("delta").innerHTML =
+    `<span class="big">Booking Air Canada on contract rates lowers Year-1 net profit by <b>${fmt(diff)}</b>.</span>`+
+    `${fmt(nb)} without the contract vs ${fmt(nc)} with it — because you forgo Air Canada commission on contracted fares. `+
+    `The <b>${better}</b>-contract scenario is more profitable for ${inp.clientName||'this client'}.`;
+
+  renderPL("plDetail", baseRes, ctrRes);
+}
+
+document.addEventListener('input', recalc);
+document.addEventListener('change', recalc);
+recalc();
+</script>
+</body>
+</html>
