@@ -862,7 +862,12 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); en
 function exportPDF(){
   const d = document.querySelector('details.pl'); const was = d.open; d.open = true;
   closeModal(); endTour();
-  setTimeout(()=>{ window.print(); setTimeout(()=>{ d.open = was; }, 400); }, 60);
+  // The browser's "Save as PDF" uses the page title as the default filename,
+  // so name it after the client, e.g. "Henry Schein Revised — Profitability.pdf"
+  const client = ($("clientName").value || 'Client').trim().replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,' ');
+  const origTitle = document.title;
+  document.title = client + ' — Profitability';
+  setTimeout(()=>{ window.print(); setTimeout(()=>{ d.open = was; document.title = origTitle; }, 600); }, 60);
 }
 function toast(m){
   let t = document.getElementById('toast');
