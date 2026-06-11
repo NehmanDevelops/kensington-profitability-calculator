@@ -47,8 +47,10 @@
   .topbar h1{margin:0;font-family:var(--display);font-size:19px;font-weight:500;color:var(--cream)}
   .topbar .sub{margin-left:auto;color:var(--cream);font-size:13px;opacity:.85}
 
-  .wrap{display:grid;grid-template-columns:minmax(340px,400px) 1fr;gap:26px;max-width:1320px;margin:26px auto;padding:0 26px;align-items:start}
-  @media(max-width:940px){.wrap{grid-template-columns:1fr;margin:18px auto}}
+  .wrap{display:grid;grid-template-columns:auto 1fr;gap:26px;max-width:1400px;margin:26px auto;padding:0 26px;align-items:start}
+  #inputs{width:470px;min-width:360px;max-width:860px;resize:horizontal;overflow:auto}
+  .resizehint{padding:8px 22px 14px;font-size:10.5px;letter-spacing:.06em;color:var(--muted);text-align:right}
+  @media(max-width:940px){.wrap{grid-template-columns:1fr;margin:18px auto}#inputs{width:auto;min-width:0;max-width:none;resize:none}.resizehint{display:none}}
 
   /* ---------- form ---------- */
   .panel{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);box-shadow:var(--shadow)}
@@ -164,6 +166,35 @@
   .tour-cap .tstep{margin-right:auto;font-size:11.5px;color:var(--muted)}
   .tour-cap button{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:6px;cursor:pointer;border:1px solid var(--card-b);background:#fff;color:var(--ink)}
   .tour-cap button.prim{background:var(--gold);border-color:var(--gold-d);color:var(--ink)}
+
+  /* ---------- result actions (Save PDF / Share) ---------- */
+  .ractions{display:flex;gap:10px;justify-content:flex-end}
+  .abtn{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:#fff;border:1px solid var(--card-b);padding:9px 15px;border-radius:var(--radius);cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+  .abtn:hover{border-color:var(--gold);color:var(--gold-d)}
+  .abtn.prim{background:var(--gold);border-color:var(--gold-d);color:var(--cream)}
+  .abtn.prim:hover{background:var(--gold-d);color:var(--cream)}
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--cream);padding:11px 20px;border-radius:6px;font-size:13px;letter-spacing:.02em;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:90}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------- print report (Save as PDF) ---------- */
+  .printonly{display:none}
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff}
+    .hnav,.ractions,.resizehint,#inputs,.ov,.tour-cap,.toast,details.pl>summary{display:none !important}
+    .wrap{display:block;max-width:none;margin:0;padding:0}
+    .results{position:static;gap:18px}
+    .topbar{padding:14px 0;border-bottom:2px solid var(--gold)}
+    .cards,details.pl,.takeaway{box-shadow:none;break-inside:avoid}
+    details.pl{border:1px solid var(--card-b)}
+    .pl-wrap{overflow:visible}
+    .printonly{display:block}
+    .print-meta{margin:14px 0 18px}
+    .print-meta .pm-client{font-family:var(--display);font-size:22px;color:var(--ink)}
+    .print-meta .pm-sub{font-size:12px;color:var(--muted);margin-top:3px;letter-spacing:.03em}
+  }
 </style>
 </head>
 <body>
@@ -185,7 +216,7 @@
     <div class="panel-h">Client &amp; deal</div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
-    <div class="row"><label>Total annual spend</label><input type="number" id="totalSpend" value="1500000"></div>
+    <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
     <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
 
@@ -193,7 +224,7 @@
       <summary>Assumptions</summary>
       <div class="inner">
         <div class="row" style="padding-left:0;padding-right:0"><label>Hotel-only &amp; car-only bookings?</label><select id="hotelCarOnly"><option>No</option><option>Yes</option></select></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Non-GDS add-on booking %</label><input type="number" id="nonGdsPct" value="0" step="0.5"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Non-GDS add-on booking %</label><input type="text" inputmode="decimal" class="numf" id="nonGdsPct" value="0"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Client provides total spend data?</label><select id="providesSpend"><option>No</option><option>Yes</option></select></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>…by % or $</label><select id="spendUnit"><option>%</option><option>$</option></select></div>
         <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Client provides avg spend/booking?</label><select id="providesAvg"><option>No</option><option>Yes</option></select></div>
@@ -244,10 +275,16 @@
         </table>
       </div>
     </details>
+    <div class="resizehint">↔ drag the right edge to widen</div>
   </div>
 
   <!-- ============================ RESULTS ============================ -->
   <div class="results">
+    <div class="ractions">
+      <button class="abtn prim" onclick="exportPDF()">⤓ Save as PDF</button>
+      <button class="abtn" onclick="shareLink()">Copy share link</button>
+    </div>
+    <div class="printonly print-meta" id="printMeta"></div>
     <div class="cards">
       <div class="rcard" id="scnBase"></div>
       <div class="rcard" id="scnContract"></div>
@@ -359,8 +396,37 @@ const DEF = {
 
 /* ---------- build the editable tables from DEF ---------- */
 const $ = id => document.getElementById(id);
-function num(v){ return parseFloat(v)||0; }
-function cellInput(val,cls){ return `<input class="${cls||''}" type="number" step="any" value="${val}">`; }
+function num(v){ return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }   // strips $ , spaces
+function cellInput(val,cls){ return `<input class="${cls||''} numf" type="text" inputmode="decimal" value="${val}">`; }
+
+/* ---- number formatting: thousands separators (+ $ on .money fields) ---- */
+function groupVal(raw, dollar){
+  const neg = String(raw).trim().charAt(0)==='-';
+  let s = String(raw).replace(/[^0-9.]/g,'');
+  const fd = s.indexOf('.');
+  if(fd!==-1) s = s.slice(0,fd+1) + s.slice(fd+1).replace(/\./g,'');   // only first dot
+  const dot = s.indexOf('.');
+  let int = dot!==-1 ? s.slice(0,dot) : s;
+  const dec = dot!==-1 ? s.slice(dot+1) : null;
+  int = int.replace(/^0+(?=\d)/,'');
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  let out = grouped + (dot!==-1 ? '.'+dec : '');
+  if(out!=='' && dollar) out = '$'+out;
+  if(neg) out = '-'+out;
+  return out;
+}
+function formatField(el){
+  const dollar = el.classList.contains('money');
+  const start = el.selectionStart||0;
+  const before = el.value.slice(0,start).replace(/[^0-9.]/g,'').length;
+  const nv = groupVal(el.value, dollar);
+  if(nv===el.value) return;
+  el.value = nv;
+  let seen=0, pos=nv.length;
+  for(let i=0;i<nv.length;i++){ if(/[0-9.]/.test(nv[i])){ seen++; if(seen===before){ pos=i+1; break; } } }
+  if(before===0) pos = (dollar && nv.charAt(0)==='$') ? 1 : 0;
+  try{ el.setSelectionRange(pos,pos); }catch(e){}
+}
 
 function setLogo(){
   const e=$("brandLogo");
@@ -632,6 +698,13 @@ function recalc(){
     `The <b>${better}</b>-contract scenario is more profitable for ${inp.clientName||'this client'}.`;
 
   renderPL("plDetail", baseRes, ctrRes);
+
+  const pm = $("printMeta");
+  if(pm){
+    const when = new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+    pm.innerHTML = `<div class="pm-client">${inp.clientName||'Client'}</div>`+
+      `<div class="pm-sub">Profitability summary · ${inp.currency} · total spend ${fmt(inp.totalSpend)} · generated ${when}</div>`;
+  }
 }
 
 /* =================================================================== *
@@ -783,8 +856,45 @@ function renderTour(){
 }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); endTour(); } });
 
+/* =================================================================== *
+ *  EXPORT — Save as PDF (print) & Share link                          *
+ * =================================================================== */
+function exportPDF(){
+  const d = document.querySelector('details.pl'); const was = d.open; d.open = true;
+  closeModal(); endTour();
+  setTimeout(()=>{ window.print(); setTimeout(()=>{ d.open = was; }, 400); }, 60);
+}
+function toast(m){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent = m; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function shareLink(){
+  const els = [...document.querySelectorAll('#inputs input, #inputs select')];
+  const data = btoa(unescape(encodeURIComponent(JSON.stringify(els.map(e=>e.value)))));
+  const url = location.origin + location.pathname + '#d=' + data;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>toast('Share link copied — paste it to send'))
+      .catch(()=>window.prompt('Copy this share link:', url));
+  } else { window.prompt('Copy this share link:', url); }
+}
+function restoreFromLink(){
+  if(location.hash.indexOf('#d=')!==0) return;
+  try{
+    const vals = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
+    const els = [...document.querySelectorAll('#inputs input, #inputs select')];
+    vals.forEach((v,i)=>{ if(els[i]!==undefined) els[i].value = v; });
+  }catch(e){}
+}
+
+/* live thousands-separator formatting on numeric fields */
+document.addEventListener('input', e=>{ if(e.target.classList && e.target.classList.contains('numf')) formatField(e.target); });
 document.addEventListener('input', recalc);
 document.addEventListener('change', recalc);
+
+restoreFromLink();
+document.querySelectorAll('.numf').forEach(el=>formatField(el));   // format initial values
 recalc();
 </script>
 </body>
