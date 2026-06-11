@@ -54,7 +54,11 @@
 
   /* ---------- form ---------- */
   .panel{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .panel-h{padding:18px 22px 4px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;padding:15px 22px 6px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep)}
+  .reset-btn{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);background:none;border:1px solid var(--card-b);padding:6px 11px;border-radius:var(--radius);cursor:pointer;transition:border-color .15s,color .15s}
+  .reset-btn:hover{border-color:var(--gold);color:var(--ink)}
+  .tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--card-b);color:var(--muted);font-size:10px;font-weight:700;cursor:help;font-family:var(--sans);vertical-align:middle;margin-left:5px;text-transform:none;letter-spacing:0}
+  .tip:hover{border-color:var(--gold);color:var(--gold-d)}
   .row{display:flex;align-items:center;gap:12px;padding:12px 22px;border-bottom:1px solid var(--soft)}
   .row:last-child{border-bottom:none}
   .row label{flex:1;font-weight:400;color:var(--secondary)}
@@ -213,7 +217,7 @@
 <div class="wrap">
   <!-- ============================ INPUTS ============================ -->
   <div class="panel" id="inputs">
-    <div class="panel-h">Client &amp; deal</div>
+    <div class="panel-h"><span>Client &amp; deal</span><button class="reset-btn" onclick="resetForm()" title="Clear the form to start a new client">New client</button></div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
     <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
@@ -893,13 +897,58 @@ function restoreFromLink(){
   }catch(e){}
 }
 
-/* live thousands-separator formatting on numeric fields */
-document.addEventListener('input', e=>{ if(e.target.classList && e.target.classList.contains('numf')) formatField(e.target); });
-document.addEventListener('input', recalc);
-document.addEventListener('change', recalc);
+/* =================================================================== *
+ *  PERSISTENCE (auto-save), TOOLTIPS, RESET                           *
+ * =================================================================== */
+const STORAGE_KEY = 'kenProfitCalc.v1';
+const formEls = () => [...document.querySelectorAll('#inputs input, #inputs select')];
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(formEls().map(e=>e.value))); }catch(e){} }
+function loadState(){ try{ const s=localStorage.getItem(STORAGE_KEY); if(!s) return false; const v=JSON.parse(s); const els=formEls(); v.forEach((x,i)=>{ if(els[i]!==undefined) els[i].value=x; }); return true; }catch(e){ return false; } }
 
-restoreFromLink();
-document.querySelectorAll('.numf').forEach(el=>formatField(el));   // format initial values
+const TIPS = {
+  currency:'Display currency for all dollar figures (USD or CAD, converted at the rate in the config). It doesn’t change the deal itself.',
+  needsOBT:'Online Booking Tool — a self-serve site (like Concur) where travellers book their own trips online instead of calling an agent.',
+  merchant:'Whether Travel Edge processes the service-fee payments and absorbs the card / merchant processing cost (vs. the client handling it).',
+  hotelCarOnly:'Bookings for just a hotel or just a car, with no flight attached. Turn on if the client makes these on their own.',
+  nonGdsPct:'Share of bookings made outside the GDS (e.g. direct or web fares not in Sabre/Apollo). A small add-on fee can apply to these.',
+  providesSpend:'Did the client share their actual annual spend by category? If yes, the model uses their figures instead of estimates.',
+  spendUnit:'Whether the client gave their spend split as percentages or as dollar amounts.',
+  providesAvg:'Did the client share their average spend per booking? If not, industry averages are used.',
+  changeBookingFee:'Turn on to replace the standard per-booking agent/online fees with the BD-proposed fees.',
+  changeOtherFee:'Turn on to replace the standard implementation / OBT / account-management fees with BD-proposed amounts.'
+};
+function addTips(){
+  for(const id in TIPS){
+    const el=$(id); if(!el) continue;
+    const label=el.closest('.row') && el.closest('.row').querySelector('label');
+    if(!label || label.querySelector('.tip')) continue;
+    const t=document.createElement('span'); t.className='tip'; t.title=TIPS[id]; t.textContent='?';
+    const hint=label.querySelector('.hint');
+    if(hint) label.insertBefore(t, hint); else label.appendChild(t);
+  }
+}
+
+const FORM_DEFAULTS = formEls().map(e=>e.value);   // snapshot the standard starting values
+function resetForm(){
+  if(!confirm('Start a new client? This clears the current inputs.')) return;
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  if(location.hash){ history.replaceState(null,'',location.pathname); }
+  const els=formEls(); FORM_DEFAULTS.forEach((v,i)=>{ if(els[i]) els[i].value=v; });
+  $("clientName").value=''; $("totalSpend").value='';
+  document.querySelectorAll('.numf').forEach(el=>formatField(el));
+  recalc();
+}
+
+addTips();
+
+/* live formatting + recalc + auto-save */
+document.addEventListener('input', e=>{ if(e.target.classList && e.target.classList.contains('numf')) formatField(e.target); });
+document.addEventListener('input', ()=>{ recalc(); saveState(); });
+document.addEventListener('change', ()=>{ recalc(); saveState(); });
+
+/* on load: a shared link wins; otherwise restore the browser's saved state */
+if(location.hash.indexOf('#d=')===0){ restoreFromLink(); } else { loadState(); }
+document.querySelectorAll('.numf').forEach(el=>formatField(el));   // format restored/initial values
 recalc();
 </script>
 </body>
