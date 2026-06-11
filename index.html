@@ -57,8 +57,17 @@
   .panel-h{display:flex;align-items:center;justify-content:space-between;padding:15px 22px 6px;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep)}
   .reset-btn{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-d);background:none;border:1px solid var(--card-b);padding:6px 11px;border-radius:var(--radius);cursor:pointer;transition:border-color .15s,color .15s}
   .reset-btn:hover{border-color:var(--gold);color:var(--ink)}
-  .tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--card-b);color:var(--muted);font-size:10px;font-weight:700;cursor:help;font-family:var(--sans);vertical-align:middle;margin-left:5px;text-transform:none;letter-spacing:0}
-  .tip:hover{border-color:var(--gold);color:var(--gold-d)}
+  .tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--card-b);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--sans);vertical-align:middle;margin-left:5px;text-transform:none;letter-spacing:0;user-select:none}
+  .tip:hover{border-color:var(--gold);color:var(--gold-d);background:var(--gold-tint)}
+  .tippop{position:fixed;z-index:85;max-width:260px;background:var(--ink);color:var(--cream);padding:12px 14px;border-radius:8px;font-size:12.5px;line-height:1.5;letter-spacing:.01em;box-shadow:0 14px 34px -12px rgba(0,0,0,.55);display:none}
+  .tippop.show{display:block}
+  .tippop-arrow{position:absolute;width:10px;height:10px;background:var(--ink);transform:rotate(45deg)}
+  .saved-bar{display:flex;gap:8px;align-items:center;padding:12px 22px;border-bottom:1px solid var(--soft);background:var(--gold-tint)}
+  .saved-bar select{flex:1;min-width:0;text-align:left}
+  .sv-btn{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:#fff;border:1px solid var(--card-b);padding:8px 12px;border-radius:var(--radius);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s,background .15s}
+  .sv-btn:hover{border-color:var(--gold);color:var(--gold-d)}
+  .sv-btn.prim{background:var(--gold);border-color:var(--gold-d);color:var(--cream)}
+  .sv-btn.prim:hover{background:var(--gold-d);color:var(--cream)}
   .row{display:flex;align-items:center;gap:12px;padding:12px 22px;border-bottom:1px solid var(--soft)}
   .row:last-child{border-bottom:none}
   .row label{flex:1;font-weight:400;color:var(--secondary)}
@@ -218,6 +227,11 @@
   <!-- ============================ INPUTS ============================ -->
   <div class="panel" id="inputs">
     <div class="panel-h"><span>Client &amp; deal</span><button class="reset-btn" onclick="resetForm()" title="Clear the form to start a new client">New client</button></div>
+    <div class="saved-bar">
+      <select id="savedList" onchange="loadDeal(this.value)" title="Open a saved deal"><option value="">Saved deals…</option></select>
+      <button class="sv-btn prim" onclick="saveCurrent()" title="Save the current deal">Save</button>
+      <button class="sv-btn" onclick="deleteDeal()" title="Delete the selected saved deal">Delete</button>
+    </div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
     <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
@@ -880,7 +894,7 @@ function toast(m){
   clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2400);
 }
 function shareLink(){
-  const els = [...document.querySelectorAll('#inputs input, #inputs select')];
+  const els = formEls();
   const data = btoa(unescape(encodeURIComponent(JSON.stringify(els.map(e=>e.value)))));
   const url = location.origin + location.pathname + '#d=' + data;
   if(navigator.clipboard && navigator.clipboard.writeText){
@@ -892,7 +906,7 @@ function restoreFromLink(){
   if(location.hash.indexOf('#d=')!==0) return;
   try{
     const vals = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
-    const els = [...document.querySelectorAll('#inputs input, #inputs select')];
+    const els = formEls();
     vals.forEach((v,i)=>{ if(els[i]!==undefined) els[i].value = v; });
   }catch(e){}
 }
@@ -901,9 +915,45 @@ function restoreFromLink(){
  *  PERSISTENCE (auto-save), TOOLTIPS, RESET                           *
  * =================================================================== */
 const STORAGE_KEY = 'kenProfitCalc.v1';
-const formEls = () => [...document.querySelectorAll('#inputs input, #inputs select')];
+const formEls = () => [...document.querySelectorAll('#inputs input, #inputs select')].filter(e=>!e.closest('.saved-bar'));
 function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(formEls().map(e=>e.value))); }catch(e){} }
 function loadState(){ try{ const s=localStorage.getItem(STORAGE_KEY); if(!s) return false; const v=JSON.parse(s); const els=formEls(); v.forEach((x,i)=>{ if(els[i]!==undefined) els[i].value=x; }); return true; }catch(e){ return false; } }
+
+/* ---- named saved deals (save / load / delete multiple) ---- */
+const DEALS_KEY = 'kenProfitCalc.deals';
+function getDeals(){ try{ return JSON.parse(localStorage.getItem(DEALS_KEY)||'{}'); }catch(e){ return {}; } }
+function putDeals(d){ try{ localStorage.setItem(DEALS_KEY, JSON.stringify(d)); }catch(e){} }
+function refreshSavedList(sel){
+  const list=$("savedList"); if(!list) return;
+  const d=getDeals();
+  const names=Object.keys(d).sort((a,b)=>(d[b].ts||0)-(d[a].ts||0));
+  list.innerHTML='<option value="">Saved deals ('+names.length+')…</option>'+
+    names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+  list.value = (sel!==undefined) ? sel : '';
+}
+function saveCurrent(){
+  let name=($("clientName").value||'').trim();
+  if(!name){ name=(window.prompt('Name this deal:')||'').trim(); if(!name) return; $("clientName").value=name; }
+  const d=getDeals(); const existed=!!d[name];
+  d[name]={ vals: formEls().map(e=>e.value), ts: Date.now() };
+  putDeals(d); refreshSavedList(name); saveState();
+  toast((existed?'Updated':'Saved')+' “'+name+'”');
+}
+function loadDeal(name){
+  if(!name) return;
+  const d=getDeals(); if(!d[name]) return;
+  const els=formEls(); d[name].vals.forEach((v,i)=>{ if(els[i]!==undefined) els[i].value=v; });
+  document.querySelectorAll('.numf').forEach(el=>formatField(el));
+  recalc(); saveState(); refreshSavedList(name);
+  toast('Opened “'+name+'”');
+}
+function deleteDeal(){
+  const name=$("savedList").value;
+  if(!name){ toast('Pick a saved deal first'); return; }
+  if(!window.confirm('Delete saved deal “'+name+'”?')) return;
+  const d=getDeals(); delete d[name]; putDeals(d); refreshSavedList();
+  toast('Deleted “'+name+'”');
+}
 
 const TIPS = {
   currency:'Display currency for all dollar figures (USD or CAD, converted at the rate in the config). It doesn’t change the deal itself.',
@@ -922,11 +972,37 @@ function addTips(){
     const el=$(id); if(!el) continue;
     const label=el.closest('.row') && el.closest('.row').querySelector('label');
     if(!label || label.querySelector('.tip')) continue;
-    const t=document.createElement('span'); t.className='tip'; t.title=TIPS[id]; t.textContent='?';
+    const t=document.createElement('span'); t.className='tip'; t.dataset.tip=TIPS[id]; t.title=TIPS[id]; t.textContent='?';
     const hint=label.querySelector('.hint');
     if(hint) label.insertBefore(t, hint); else label.appendChild(t);
   }
 }
+
+/* click-to-open info popover for the "?" badges */
+function ensurePop(){ let p=document.getElementById('tipPop'); if(!p){ p=document.createElement('div'); p.id='tipPop'; p.className='tippop'; p.innerHTML='<span class="tippop-arrow"></span><span class="tippop-body"></span>'; document.body.appendChild(p); } return p; }
+function hideTip(){ const p=document.getElementById('tipPop'); if(p){ p.classList.remove('show'); p._for=null; } }
+function showTip(tip){
+  const p=ensurePop();
+  p.querySelector('.tippop-body').textContent = tip.dataset.tip || '';
+  p.classList.add('show'); p._for=tip;
+  const pw=Math.min(260, window.innerWidth-24); p.style.maxWidth=pw+'px';
+  const r=tip.getBoundingClientRect();
+  let left=Math.max(12, Math.min(r.left + r.width/2 - pw/2, window.innerWidth-pw-12));
+  p.style.left=left+'px'; p.style.top=(r.bottom+12)+'px';
+  const ph=p.offsetHeight, arrow=p.querySelector('.tippop-arrow');
+  let below = !(r.bottom+12+ph > window.innerHeight-12 && r.top-12-ph > 12);
+  p.style.top = (below ? r.bottom+12 : r.top-12-ph)+'px';
+  arrow.style.left = Math.max(8, Math.min(pw-18, r.left + r.width/2 - left - 5))+'px';
+  arrow.style.top = below ? '-5px' : ''; arrow.style.bottom = below ? '' : '-5px';
+}
+document.addEventListener('click', e=>{
+  const tip = e.target.closest ? e.target.closest('.tip') : null;
+  const p = document.getElementById('tipPop');
+  if(tip){ e.preventDefault(); e.stopPropagation(); if(p && p.classList.contains('show') && p._for===tip) hideTip(); else showTip(tip); return; }
+  if(p && p.classList.contains('show') && !p.contains(e.target)) hideTip();
+});
+window.addEventListener('scroll', hideTip, true);
+window.addEventListener('resize', hideTip);
 
 const FORM_DEFAULTS = formEls().map(e=>e.value);   // snapshot the standard starting values
 function resetForm(){
@@ -935,11 +1011,13 @@ function resetForm(){
   if(location.hash){ history.replaceState(null,'',location.pathname); }
   const els=formEls(); FORM_DEFAULTS.forEach((v,i)=>{ if(els[i]) els[i].value=v; });
   $("clientName").value=''; $("totalSpend").value='';
+  const sl=$("savedList"); if(sl) sl.value='';
   document.querySelectorAll('.numf').forEach(el=>formatField(el));
   recalc();
 }
 
 addTips();
+refreshSavedList();
 
 /* live formatting + recalc + auto-save */
 document.addEventListener('input', e=>{ if(e.target.classList && e.target.classList.contains('numf')) formatField(e.target); });
