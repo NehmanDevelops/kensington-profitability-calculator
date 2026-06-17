@@ -892,11 +892,13 @@ function closeModal(){ $("ov").classList.remove('show'); }
  *  DEMO — guided tour                                                 *
  * =================================================================== */
 const TOUR = [
-  {sel:'#inputs',     t:'1 · Enter the deal',        x:'Type the client name and total annual spend, then answer a couple of questions. Everything else has smart defaults you can open and adjust.'},
-  {sel:'.cards',      t:'2 · Two live scenarios',    x:'The model instantly computes Year-1 net profit two ways — with and without an Air Canada contract. The green “Higher profit” card is the better outcome.'},
-  {sel:'#delta',      t:'3 · Plain-English impact',  x:'A one-line takeaway shows exactly how much profit the airline contract adds or removes, and why.'},
-  {sel:'details.pl',  t:'4 · Full 3-year P&L',       x:'Open this for the complete revenue, expense and margin breakdown across all three years.', open:'details.pl'},
-  {sel:'#howBtn',     t:'5 · Show the math',         x:'“How it’s calculated” lists every formula and shows the model reconciles to the dollar.'},
+  {sel:'#inputs',       t:'1 · Enter the deal',       x:'Type the client name and total annual spend, then answer a couple of questions. Everything else has smart defaults you can open and adjust.'},
+  {sel:'.saved-bar',    t:'2 · Save & switch deals',  x:'Built a deal? Hit Save to keep it. Start another with “New client”, then reopen any saved deal from this menu anytime — they’re kept in your browser, and Delete removes one.'},
+  {sel:'.modebar .tip', t:'3 · Stuck on a term?',     x:'See a “?” next to a field? Click it and a little box explains that field in plain English — so nothing is left as jargon.', open:'#inputs'},
+  {sel:'.cards',        t:'4 · Two live scenarios',   x:'The model instantly computes Year-1 net profit two ways — with and without an Air Canada contract. The green “Higher profit” card is the better outcome.'},
+  {sel:'#delta',        t:'5 · Plain-English impact', x:'A one-line takeaway shows exactly how much profit the airline contract adds or removes, and why.'},
+  {sel:'details.pl',    t:'6 · Full 3-year P&L',      x:'Open this for the complete revenue, expense and margin breakdown across all three years.', open:'details.pl'},
+  {sel:'#howBtn',       t:'7 · Show the math',        x:'“How it’s calculated” lists every formula and shows the model reconciles to the dollar.'},
 ];
 let tstep = 0;
 function clearRing(){ document.querySelectorAll('.tour-ring').forEach(e=>e.classList.remove('tour-ring')); }
