@@ -243,7 +243,7 @@
       <button class="sv-btn" onclick="deleteDeal()" title="Delete the selected saved deal">Delete</button>
     </div>
     <div class="modebar">
-      <span class="modebar-lbl">Enter fee values as</span>
+      <span class="modebar-lbl">Enter fee values as <span class="tip" data-tip="Choose whether fees are typed as flat dollar amounts or as a percentage of total sales. This sets every fee at once — and each fee can still be switched on its own. When a fee is in % mode its box shows a % sign; in $ mode it shows a $." title="$ = flat dollar amount · % = percent of total sales">?</span></span>
       <span class="seg">
         <button type="button" class="segbtn" onclick="setAllModes('$')">$ Dollars</button>
         <button type="button" class="segbtn" onclick="setAllModes('%')">% of sales</button>
@@ -449,7 +449,7 @@ function num(v){ return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0; }   /
 function cellInput(val,cls){ return `<input class="${cls||''} numf" type="text" inputmode="decimal" value="${val}">`; }
 
 /* ---- number formatting: thousands separators (+ $ on .money fields) ---- */
-function groupVal(raw, dollar){
+function groupVal(raw, unit){   // unit: '$' (prefix), '%' (suffix), or '' (plain)
   const neg = String(raw).trim().charAt(0)==='-';
   let s = String(raw).replace(/[^0-9.]/g,'');
   const fd = s.indexOf('.');
@@ -460,21 +460,34 @@ function groupVal(raw, dollar){
   int = int.replace(/^0+(?=\d)/,'');
   const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   let out = grouped + (dot!==-1 ? '.'+dec : '');
-  if(out!=='' && dollar) out = '$'+out;
+  if(out!==''){ if(unit==='$') out='$'+out; else if(unit==='%') out=out+'%'; }
   if(neg) out = '-'+out;
   return out;
 }
+/* a fee field linked to a $/% selector formats to match it; money fields are $; others plain */
+function fieldUnit(el){
+  if(el.id==='conciergeVal'){ const m=$("conciergeMode"); return m?m.value:''; }
+  const tr = el.closest && el.closest('tr[data-other]');
+  if(tr){ const m=tr.querySelector('.o-mode'); if(m) return m.value; }
+  return el.classList.contains('money') ? '$' : '';
+}
 function formatField(el){
-  const dollar = el.classList.contains('money');
+  const unit = fieldUnit(el);
   const start = el.selectionStart||0;
   const before = el.value.slice(0,start).replace(/[^0-9.]/g,'').length;
-  const nv = groupVal(el.value, dollar);
+  const nv = groupVal(el.value, unit);
   if(nv===el.value) return;
   el.value = nv;
   let seen=0, pos=nv.length;
   for(let i=0;i<nv.length;i++){ if(/[0-9.]/.test(nv[i])){ seen++; if(seen===before){ pos=i+1; break; } } }
-  if(before===0) pos = (dollar && nv.charAt(0)==='$') ? 1 : 0;
+  if(before===0) pos = (nv.charAt(0)==='$') ? 1 : 0;
   try{ el.setSelectionRange(pos,pos); }catch(e){}
+}
+/* when a $/% selector changes, re-format its linked field(s) so the $ / % shows */
+function reformatLinked(sel){
+  if(sel.id==='conciergeMode'){ formatField($("conciergeVal")); return; }
+  const tr = sel.closest && sel.closest('tr[data-other]');
+  if(tr){ tr.querySelectorAll('.o-std, .o-bd').forEach(formatField); }
 }
 
 function setLogo(){
@@ -960,6 +973,7 @@ const STORAGE_KEY = 'kenProfitCalc.v2';
 /* sets every fee's $/% selector at once (per-field selectors can still be changed) */
 function setAllModes(m){
   document.querySelectorAll('.modeSel').forEach(s=>{ s.value=m; });
+  document.querySelectorAll('.modeSel').forEach(reformatLinked);
   document.querySelectorAll('.segbtn').forEach(b=>b.classList.toggle('active', b.textContent.trim().charAt(0)===m));
   recalc(); saveState();
 }
@@ -1069,6 +1083,7 @@ refreshSavedList();
 
 /* live formatting + recalc + auto-save */
 document.addEventListener('input', e=>{ if(e.target.classList && e.target.classList.contains('numf')) formatField(e.target); });
+document.addEventListener('change', e=>{ if(e.target.classList && e.target.classList.contains('modeSel')) reformatLinked(e.target); });
 document.addEventListener('input', ()=>{ recalc(); saveState(); });
 document.addEventListener('change', ()=>{ recalc(); saveState(); });
 
