@@ -68,6 +68,16 @@
   .sv-btn:hover{border-color:var(--gold);color:var(--gold-d)}
   .sv-btn.prim{background:var(--gold);border-color:var(--gold-d);color:var(--cream)}
   .sv-btn.prim:hover{background:var(--gold-d);color:var(--cream)}
+  .modebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 22px;border-bottom:1px solid var(--soft)}
+  .modebar-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);white-space:nowrap}
+  .modebar-note{font-size:10.5px;color:var(--muted);flex:1;min-width:120px}
+  .seg{display:inline-flex;border:1px solid var(--card-b);border-radius:var(--radius);overflow:hidden}
+  .segbtn{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:7px 11px;background:#fff;border:none;cursor:pointer;color:var(--secondary)}
+  .segbtn+.segbtn{border-left:1px solid var(--card-b)}
+  .segbtn.active{background:var(--gold);color:var(--cream)}
+  .dualwrap{display:inline-flex;gap:6px;align-items:center}
+  .dualwrap input{width:78px}
+  .modeSel{width:auto;cursor:pointer}
   .row{display:flex;align-items:center;gap:12px;padding:12px 22px;border-bottom:1px solid var(--soft)}
   .row:last-child{border-bottom:none}
   .row label{flex:1;font-weight:400;color:var(--secondary)}
@@ -232,11 +242,20 @@
       <button class="sv-btn prim" onclick="saveCurrent()" title="Save the current deal">Save</button>
       <button class="sv-btn" onclick="deleteDeal()" title="Delete the selected saved deal">Delete</button>
     </div>
+    <div class="modebar">
+      <span class="modebar-lbl">Enter fee values as</span>
+      <span class="seg">
+        <button type="button" class="segbtn" onclick="setAllModes('$')">$ Dollars</button>
+        <button type="button" class="segbtn" onclick="setAllModes('%')">% of sales</button>
+      </span>
+      <span class="modebar-note">sets every fee’s mode; you can still flip any one below</span>
+    </div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
     <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
     <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
+    <div class="row"><label>Concierge &amp; Entourage fee<span class="hint">% of total sales · typical 7–15%</span></label><span class="dualwrap"><input class="numf" id="conciergeVal" value="0"><select class="modeSel" id="conciergeMode"><option>%</option><option>$</option></select></span></div>
 
     <details class="adv">
       <summary>Assumptions</summary>
@@ -285,11 +304,23 @@
     </details>
 
     <details class="adv">
+      <summary>Agent air ticket fee (flat)</summary>
+      <div class="inner">
+        <p class="mininote">Optional: charge agent air fees by ticket count instead of deriving them from spend. When Air Canada value tops $200k, AC contract tickets are excluded.</p>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Use flat per-ticket fee?</label><select id="flatFeeMode"><option>No</option><option>Yes</option></select></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Air Canada total value over $200k?</label><select id="acOver200k"><option>No</option><option>Yes</option></select></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Air Canada tickets (excluded)</label><input class="numf" id="acTickets" value="0"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Total agent tickets (incl. AC)</label><input class="numf" id="totalAgentTickets" value="0"></div>
+        <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Fee per ticket</label><input class="numf money" id="flatFeeAmt" value="35"></div>
+      </div>
+    </details>
+
+    <details class="adv">
       <summary>Other fees</summary>
       <div class="inner">
         <div class="row" style="padding-left:0;padding-right:0"><label>BD changes the "other" fees?</label><select id="changeOtherFee"><option>No</option><option>Yes</option></select></div>
         <table class="grid" id="otherFeeTable">
-          <tr><th>Fee</th><th>Applied?</th><th>Std $</th><th>BD $</th></tr>
+          <tr><th>Fee</th><th>Applied?</th><th>Std</th><th>BD</th><th>$/%</th></tr>
         </table>
       </div>
     </details>
@@ -472,8 +503,9 @@ function setLogo(){
   let o=$("otherFeeTable");
   DEF.other.forEach((r,i)=> o.insertAdjacentHTML("beforeend",
     `<tr data-other="${i}"><td>${r[0]}</td>
-      <td><select class="o-applied" style="width:58px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
-      <td>${cellInput(r[2],'o-std')}</td><td>${cellInput(r[3],'o-bd')}</td></tr>`));
+      <td><select class="o-applied" style="width:52px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
+      <td>${cellInput(r[2],'o-std')}</td><td>${cellInput(r[3],'o-bd')}</td>
+      <td><select class="o-mode modeSel" style="width:46px"><option>$</option><option>%</option></select></td></tr>`));
 })();
 setLogo();
 
@@ -493,7 +525,8 @@ function readInputs(){
   });
   const other = DEF.other.map((_,i)=>{
     const r=document.querySelector(`#otherFeeTable tr[data-other="${i}"]`);
-    return {applied:r.querySelector('.o-applied').value, std:num(r.querySelector('.o-std').value), bd:num(r.querySelector('.o-bd').value)};
+    const md=r.querySelector('.o-mode');
+    return {applied:r.querySelector('.o-applied').value, std:num(r.querySelector('.o-std').value), bd:num(r.querySelector('.o-bd').value), mode:(md?md.value:'$')};
   });
   return {
     clientName:$("clientName").value,
@@ -509,6 +542,9 @@ function readInputs(){
     airlines,
     hotelYield:num(document.querySelector('.hy').value)/100, hotelComm:num(document.querySelector('.hc').value)/100,
     carYield:num(document.querySelector('.cy').value)/100, carComm:num(document.querySelector('.cc').value)/100,
+    concierge:{ val:num($("conciergeVal").value), mode:$("conciergeMode").value },
+    flat:{ on:$("flatFeeMode").value==='Yes', acOver:$("acOver200k").value==='Yes',
+           acTickets:num($("acTickets").value), totalAgent:num($("totalAgentTickets").value), fee:num($("flatFeeAmt").value) },
     fees, other,
   };
 }
@@ -561,7 +597,16 @@ function compute(inp, acContract){
   const fOnline= i=> chg ? inp.fees[i].onlineBD: inp.fees[i].onlineStd;
   const oaFee  = CONFIG.onlineAssistFee;
   function svc(b, feeIdx){ return b.agent*fAgent(feeIdx) + b.online*fOnline(feeIdx) + b.assist*(fOnline(feeIdx)+oaFee); }
-  const srvfeerev = svc(bk[0],0) + svc(bk[1],1) + svc(hcOnly[0],4) + svc(hcOnly[1],5);
+  // agent air fee: per-booking (default) OR flat per-ticket count when flat-fee mode is on
+  const agentAirDerived = bk[0].agent*fAgent(0) + bk[1].agent*fAgent(1);
+  const airOnlineAssist = (bk[0].online*fOnline(0)+bk[0].assist*(fOnline(0)+oaFee))
+                        + (bk[1].online*fOnline(1)+bk[1].assist*(fOnline(1)+oaFee));
+  let agentAir = agentAirDerived;
+  if(inp.flat.on){
+    const tickets = Math.max(0, inp.flat.totalAgent - (inp.flat.acOver ? inp.flat.acTickets : 0));
+    agentAir = tickets * inp.flat.fee;
+  }
+  const srvfeerev = agentAir + airOnlineAssist + svc(hcOnly[0],4) + svc(hcOnly[1],5);
 
   // NON-GDS FEE REVENUE
   const nonGdsFee = chg ? inp.fees[2].agentBD : inp.fees[2].agentStd;
@@ -573,17 +618,12 @@ function compute(inp, acContract){
                     + base[2]*CONFIG.overrideHotelPct + base[3]*CONFIG.overrideCarPct;
   const gdsoverriderev = (bk[0].total*CONFIG.gdsSegPerAirDom + bk[1].total*CONFIG.gdsSegPerAirIntl)*CONFIG.gdsOverridePerSeg;
 
-  // OTHER FEES
+  // OTHER FEES (each row: flat $, or % of category sales when its mode = %)
   const O = inp.other, co = inp.changeOtherFee==="Yes";
-  const otherFee = (i)=> co ? (O[i].applied==="No" ? 0 : O[i].bd) : O[i].std;
-  const implFee   = otherFee(0);
-  const s2goImp   = otherFee(1);
-  const s2goPnrFee= co ? (O[2].applied==="No"?0:O[2].bd) : O[2].std;
-  const acctFee   = otherFee(3);
-  const obtImpFee = obt ? otherFee(4) : 0;
-
+  const rawOther = (i)=> co ? (O[i].applied==="No" ? 0 : O[i].bd) : O[i].std;
+  const otherAmt = (i, cs)=> (O[i].mode==='%' ? (rawOther(i)/100)*cs : rawOther(i));
+  const s2goPnrFee= co ? (O[2].applied==="No"?0:O[2].bd) : O[2].std;   // per-PNR, always $
   const s2goPnrBkgs = bk[0].total + bk[1].total;
-  const s2goPnrRev  = s2goPnrFee * s2goPnrBkgs;
   const s2goPnrCost = 0;
 
   // COST DRIVERS
@@ -603,15 +643,16 @@ function compute(inp, acContract){
     const rCommission = commrev*sp;
     const rService    = srvfeerev*sp;
     const rNonGds     = nongdsrev*sp;
-    const rImpl       = isY1 ? implFee  : 0;
-    const rS2goImp    = isY1 ? s2goImp  : 0;
-    const rS2goPnr    = s2goPnrRev*sp;
-    const rObtImp     = isY1 ? obtImpFee: 0;
-    const rAcct       = acctFee;
+    const rImpl       = isY1 ? otherAmt(0,catSales) : 0;
+    const rS2goImp    = isY1 ? otherAmt(1,catSales) : 0;
+    const rS2goPnr    = s2goPnrFee*s2goPnrBkgs*sp;
+    const rObtImp     = isY1 ? (obt ? otherAmt(4,catSales) : 0) : 0;
+    const rAcct       = otherAmt(3,catSales);
+    const rConcierge  = inp.concierge.mode==='%' ? (inp.concierge.val/100)*catSales : inp.concierge.val;
     const rOverride   = (overriderev + gdsoverriderev)*sp;
     const feeRevenue  = rService + rNonGds + rImpl + rS2goImp + rS2goPnr + rObtImp + rAcct;
     const totalSales  = catSales + feeRevenue;
-    const totalRevenue= rCommission + feeRevenue + rOverride;
+    const totalRevenue= rCommission + feeRevenue + rOverride + rConcierge;
     const eSales   = -salesTeamCost*sp;
     const eObt     = -obtAnnualCost*sp;
     const eObtImp  = isY1 ? -(obt?CONFIG.obtImplCost:0) : 0;
@@ -624,7 +665,7 @@ function compute(inp, acContract){
     const ovh = -totalSales*(CONFIG.overheadMarketingPct+CONFIG.overheadOperatingPct+CONFIG.overheadBackOfficePct);
     const netProfit = grossProfit + ovh;
     return {
-      sp, catSales, rCommission, rService, rNonGds, rImpl, rS2goImp, rS2goPnr, rObtImp, rAcct, rOverride,
+      sp, catSales, rCommission, rService, rNonGds, rImpl, rS2goImp, rS2goPnr, rObtImp, rAcct, rConcierge, rOverride,
       feeRevenue, totalSales, totalRevenue,
       eSales,eObt,eObtImp,eS2goPnr,eAcct,e247,eMerchant,directExp,grossProfit,ovh,netProfit,
       mGrowthExcl:(totalRevenue-rOverride)/totalSales,
@@ -678,6 +719,7 @@ function renderPL(elId, base, ctr){
     ${r('Implementation','rImpl')}
     ${r('OBT implementation','rObtImp')}
     ${r('Account mgmt fee','rAcct')}
+    ${r('Concierge & Entourage','rConcierge')}
     ${r('Back-end overrides','rOverride')}
     ${r('Total Revenue','totalRevenue','total')}
     <tr class="section"><td colspan="4">Direct expenses</td></tr>
@@ -914,13 +956,19 @@ function restoreFromLink(){
 /* =================================================================== *
  *  PERSISTENCE (auto-save), TOOLTIPS, RESET                           *
  * =================================================================== */
-const STORAGE_KEY = 'kenProfitCalc.v1';
+const STORAGE_KEY = 'kenProfitCalc.v2';
+/* sets every fee's $/% selector at once (per-field selectors can still be changed) */
+function setAllModes(m){
+  document.querySelectorAll('.modeSel').forEach(s=>{ s.value=m; });
+  document.querySelectorAll('.segbtn').forEach(b=>b.classList.toggle('active', b.textContent.trim().charAt(0)===m));
+  recalc(); saveState();
+}
 const formEls = () => [...document.querySelectorAll('#inputs input, #inputs select')].filter(e=>!e.closest('.saved-bar'));
 function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(formEls().map(e=>e.value))); }catch(e){} }
 function loadState(){ try{ const s=localStorage.getItem(STORAGE_KEY); if(!s) return false; const v=JSON.parse(s); const els=formEls(); v.forEach((x,i)=>{ if(els[i]!==undefined) els[i].value=x; }); return true; }catch(e){ return false; } }
 
 /* ---- named saved deals (save / load / delete multiple) ---- */
-const DEALS_KEY = 'kenProfitCalc.deals';
+const DEALS_KEY = 'kenProfitCalc.deals.v2';
 function getDeals(){ try{ return JSON.parse(localStorage.getItem(DEALS_KEY)||'{}'); }catch(e){ return {}; } }
 function putDeals(d){ try{ localStorage.setItem(DEALS_KEY, JSON.stringify(d)); }catch(e){} }
 function refreshSavedList(sel){
