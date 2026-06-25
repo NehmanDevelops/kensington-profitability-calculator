@@ -250,18 +250,18 @@
       </span>
       <span class="modebar-note">sets every fee’s mode; you can still flip any one below</span>
     </div>
-    <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
+    <div class="row"><label>Client name</label><input type="text" id="clientName" value="" placeholder="Client name" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
     <div class="row"><label>Market<span class="hint">Both = two implementation fees (CAD + USD)</span></label><select id="market"><option>US</option><option>CA</option><option>Both</option></select></div>
-    <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
+    <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="0"></div>
     <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Concierge &amp; Entourage fee<span class="hint">% of total sales · typical 7–15%</span></label><span class="dualwrap"><input class="numf" id="conciergeVal" value="0"><select class="modeSel" id="conciergeMode"><option>%</option><option>$</option></select></span></div>
 
     <details class="adv">
-      <summary>Assumptions</summary>
+      <summary>Assumptions <span class="tip" data-tip="General deal assumptions: the online vs. agent booking split, the count of business/premium-economy tickets, whether the client books hotel/car on their own, and whether they provided their own average fares.">?</span></summary>
       <div class="inner">
-        <div class="row" style="padding-left:0;padding-right:0"><label>Online vs Agent split<span class="hint">% of bookings made online (the rest are agent)</span></label><input type="text" inputmode="decimal" class="numf" id="onlineSplit" value="50"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Online vs Agent split<span class="hint">% of bookings made online (the rest are agent)</span></label><input type="text" inputmode="decimal" class="numf" id="onlineSplit" value="0"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Business / premium economy tickets<span class="hint">recorded on the summary</span></label><input type="text" inputmode="decimal" class="numf" id="bizPrem" value="0"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Hotel-only &amp; car-only bookings?</label><select id="hotelCarOnly"><option>No</option><option>Yes</option></select></div>
         <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Client provides avg spend/booking?</label><select id="providesAvg"><option>No</option><option>Yes</option></select></div>
@@ -269,7 +269,7 @@
     </details>
 
     <details class="adv">
-      <summary>Spend share &amp; bookings</summary>
+      <summary>Spend share &amp; bookings <span class="tip" data-tip="How the client's total spend splits across Air-Domestic, Air-International, Hotel and Car (Share %), plus the average spend per booking — used to estimate how many bookings each category generates.">?</span></summary>
       <div class="inner">
         <table class="grid" id="shareTable">
           <tr><th>Category</th><th>Share %</th><th>Ind. avg</th><th>Client avg</th></tr>
@@ -278,7 +278,7 @@
     </details>
 
     <details class="adv">
-      <summary>Air commission</summary>
+      <summary>Air commission <span class="tip" data-tip="Commission earned on air, split by Domestic and International: the commissionable % of air sales times the yield %. (Non-commissionable % is shown for reference.) Under an air contract this commission becomes $0.">?</span></summary>
       <div class="inner">
         <p class="mininote">With an <b>Air contract</b>, air commission becomes $0 (contracted fares earn none). Non-commissionable % is shown for reference.</p>
         <table class="grid" id="airTable">
@@ -291,7 +291,7 @@
     </details>
 
     <details class="adv">
-      <summary>Fee schedule</summary>
+      <summary>Fee schedule <span class="tip" data-tip="The per-booking service fees you charge for each product — Agent (booked by an agent) vs. Online (self-service).">?</span></summary>
       <div class="inner">
         <table class="grid" id="feeTable">
           <tr><th>Fee</th><th>Agent</th><th>Online</th></tr>
@@ -300,7 +300,7 @@
     </details>
 
     <details class="adv">
-      <summary>Other fees</summary>
+      <summary>Other fees <span class="tip" data-tip="Fees beyond per-booking service fees: implementation, OBT, account management, Conferma, annual fee, etc. Each can be a flat $ or % of sales, and set as One-time, Annual, or Per-PNR.">?</span></summary>
       <div class="inner">
         <table class="grid" id="otherFeeTable">
           <tr><th>Fee</th><th>Applied?</th><th>Amount</th><th>$/%</th><th>Frequency</th></tr>
@@ -392,26 +392,26 @@ const CONFIG = {
 const CATS = ["Air - Domestic","Air - International","Hotel","Car"];
 const ASSIST_SHARE = 0.20;   // online-assisted portion of online bookings
 const DEF = {
-  share:   [46.53,24.27,26.83,2.37],
-  indAvg:  [572.65,1661.55,511.28,222.47],
-  cliAvg:  [500,1500,600,200],
+  share:   [0,0,0,0],
+  indAvg:  [0,0,0,0],
+  cliAvg:  [0,0,0,0],
   // air commission, by segment: commissionable %, non-commissionable % (display), yield %
-  air: { domComm:25, domNonComm:75, domYield:3.7, intlComm:66, intlNonComm:34, intlYield:5.9 },
-  hcYield: { hotelYield:10, hotelComm:80, carYield:5.56, carComm:80 },
+  air: { domComm:0, domNonComm:0, domYield:0, intlComm:0, intlNonComm:0, intlYield:0 },
+  hcYield: { hotelYield:0, hotelComm:0, carYield:0, carComm:0 },
   // fee rows: label, agent, online
   fees:[
-    ["Air - Domestic",35,15],
-    ["Air - International",35,15],
-    ["Hotel Only",20,15],
-    ["Car Only",20,15],
+    ["Air - Domestic",0,0],
+    ["Air - International",0,0],
+    ["Hotel Only",0,0],
+    ["Car Only",0,0],
   ],
   // other fees: label, applied, amount, frequency
   other:[
-    ["Implementation Fee","Yes",500,"One-time"],
+    ["Implementation Fee","No",0,"One-time"],
     ["Safe to Go Imp Fee","No",0,"One-time"],
     ["Safe to Go (per PNR)","No",0,"Per PNR"],
     ["Account Management Fee","No",0,"Annual"],
-    ["OBT Imp Fee","Yes",500,"One-time"],
+    ["OBT Imp Fee","No",0,"One-time"],
     ["Conferma","No",0,"Annual"],
     ["Annual Fee","No",0,"Annual"],
   ],
@@ -596,7 +596,7 @@ function compute(inp, acContract){
   const obtAnnualCost = obt ? CONFIG.obtCostPerBooking * obtOnlineBkgs : 0;
   const totalAllBkgs  = bk[0].total+bk[1].total+bk[2].total+bk[3].total;
   const cost247       = CONFIG.cost247PerBooking * totalAllBkgs;
-  const acctMgmtCost  = CONFIG.acctMgmtDailyRate * (acctMgmtDays(inp.totalSpend)/2);
+  const acctMgmtCost  = inp.totalSpend>0 ? CONFIG.acctMgmtDailyRate * (acctMgmtDays(inp.totalSpend)/2) : 0;
 
   // BUILD 3-YEAR P&L
   const years = CONFIG.spendingRamp.map((sp, y)=>{
@@ -613,7 +613,7 @@ function compute(inp, acContract){
     const totalRevenue= rCommission + feeRevenue + rOverride + rConcierge;
     const eSales   = -salesTeamCost*sp;
     const eObt     = -obtAnnualCost*sp;
-    const eObtImp  = isY1 ? -(obt?CONFIG.obtImplCost:0) : 0;
+    const eObtImp  = (isY1 && obt && inp.totalSpend>0) ? -CONFIG.obtImplCost : 0;
     const eAcct    = -acctMgmtCost;
     const e247     = -cost247*sp;
     const eMerchant= inp.merchant==="Yes" ? -feeRevenue*CONFIG.merchantFeePct : 0;
@@ -625,9 +625,9 @@ function compute(inp, acContract){
       sp, catSales, rCommission, rService, others, rConcierge, rOverride,
       feeRevenue, totalSales, totalRevenue,
       eSales,eObt,eObtImp,eAcct,e247,eMerchant,directExp,grossProfit,ovh,netProfit,
-      mGrowthExcl:(totalRevenue-rOverride)/totalSales,
-      mGrowthIncl:totalRevenue/totalSales,
-      mNetExcl:grossProfit/totalSales,
+      mGrowthExcl: totalSales>0 ? (totalRevenue-rOverride)/totalSales : 0,
+      mGrowthIncl: totalSales>0 ? totalRevenue/totalSales : 0,
+      mNetExcl:    totalSales>0 ? grossProfit/totalSales : 0,
     };
   });
   return {years};
@@ -984,15 +984,14 @@ function deleteDeal(){
 
 const TIPS = {
   currency:'Display currency for all dollar figures (USD or CAD, converted at the rate in the config). It doesn’t change the deal itself.',
+  market:'Which country/countries you ticket in. “Both” applies two implementation fees — one for CAD ticketing and one for USD.',
   needsOBT:'Online Booking Tool — a self-serve site (like Concur) where travellers book their own trips online instead of calling an agent.',
   merchant:'Whether Travel Edge processes the service-fee payments and absorbs the card / merchant processing cost (vs. the client handling it).',
+  conciergeVal:'A premium concierge / entourage service fee — charged as a % of total sales (typically 7–15%) or a flat $.',
+  onlineSplit:'What share of bookings are made online (self-service) vs. through an agent. 50 = half online, half agent.',
+  bizPrem:'Number of business / premium-economy tickets in the program. Recorded on the summary for context.',
   hotelCarOnly:'Bookings for just a hotel or just a car, with no flight attached. Turn on if the client makes these on their own.',
-  nonGdsPct:'Share of bookings made outside the GDS (e.g. direct or web fares not in Sabre/Apollo). A small add-on fee can apply to these.',
-  providesSpend:'Did the client share their actual annual spend by category? If yes, the model uses their figures instead of estimates.',
-  spendUnit:'Whether the client gave their spend split as percentages or as dollar amounts.',
-  providesAvg:'Did the client share their average spend per booking? If not, industry averages are used.',
-  changeBookingFee:'Turn on to replace the standard per-booking agent/online fees with the BD-proposed fees.',
-  changeOtherFee:'Turn on to replace the standard implementation / OBT / account-management fees with BD-proposed amounts.'
+  providesAvg:'Did the client share their average spend per booking? If not, the average fares you enter are used.'
 };
 function addTips(){
   for(const id in TIPS){
