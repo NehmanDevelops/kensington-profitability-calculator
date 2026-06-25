@@ -482,6 +482,25 @@ const AIR_TIPS = [
   "Domestic air commission: the commissionable % of domestic air sales × the yield % earned on it. Non-commissionable % is shown for reference.",
   "International air commission: the commissionable % of international air sales × the yield %. Non-commissionable % is shown for reference.",
 ];
+const HC_TIPS = [
+  "Hotel commission — the yield % earned on hotel sales times the commissionable % of hotel spend that actually pays commission.",
+  "Car commission — the yield % on car rentals times the commissionable % of car spend that pays commission.",
+];
+const FEE_TIPS = [
+  "Per-booking service fee for domestic air — Agent is the fee on agent-booked tickets, Online on self-service bookings.",
+  "Per-booking service fee for international air — Agent vs Online.",
+  "Service fee for hotel-only bookings (no flight attached).",
+  "Service fee for car-only bookings (no flight attached).",
+];
+const OTHER_TIPS = [
+  "One-time fee to set up and onboard the account. With Market = Both it is charged twice (one for CAD ticketing, one for USD).",
+  "One-time fee to implement Safe to Go — the duty-of-care / traveller-tracking service.",
+  "Safe to Go charged per PNR (per booking) instead of as a flat amount.",
+  "Ongoing fee for dedicated account management — usually billed annually.",
+  "One-time fee to implement the Online Booking Tool. Applies only when the client uses an OBT.",
+  "Fee for Conferma virtual-card payments used to pay hotels and suppliers.",
+  "A recurring yearly program or management fee.",
+];
 const tipSpan = t => `<span class="tip" data-tip="${t}">?</span>`;
 (function build(){
   let s=$("shareTable");
@@ -491,14 +510,14 @@ const tipSpan = t => `<span class="tip" data-tip="${t}">?</span>`;
   a.insertAdjacentHTML("beforeend",`<tr data-air="0"><td>Domestic ${tipSpan(AIR_TIPS[0])}</td><td>${cellInput(DEF.air.domComm,'ad-comm')}</td><td>${cellInput(DEF.air.domNonComm,'ad-nc')}</td><td>${cellInput(DEF.air.domYield,'ad-yld')}</td></tr>`);
   a.insertAdjacentHTML("beforeend",`<tr data-air="1"><td>International ${tipSpan(AIR_TIPS[1])}</td><td>${cellInput(DEF.air.intlComm,'ai-comm')}</td><td>${cellInput(DEF.air.intlNonComm,'ai-nc')}</td><td>${cellInput(DEF.air.intlYield,'ai-yld')}</td></tr>`);
   let h=$("hcYield");
-  h.insertAdjacentHTML("beforeend",`<tr><td>Hotel</td><td>${cellInput(DEF.hcYield.hotelYield,'hy')}</td><td>${cellInput(DEF.hcYield.hotelComm,'hc')}</td></tr>`);
-  h.insertAdjacentHTML("beforeend",`<tr><td>Car</td><td>${cellInput(DEF.hcYield.carYield,'cy')}</td><td>${cellInput(DEF.hcYield.carComm,'cc')}</td></tr>`);
+  h.insertAdjacentHTML("beforeend",`<tr><td>Hotel ${tipSpan(HC_TIPS[0])}</td><td>${cellInput(DEF.hcYield.hotelYield,'hy')}</td><td>${cellInput(DEF.hcYield.hotelComm,'hc')}</td></tr>`);
+  h.insertAdjacentHTML("beforeend",`<tr><td>Car ${tipSpan(HC_TIPS[1])}</td><td>${cellInput(DEF.hcYield.carYield,'cy')}</td><td>${cellInput(DEF.hcYield.carComm,'cc')}</td></tr>`);
   let f=$("feeTable");
   DEF.fees.forEach((r,i)=> f.insertAdjacentHTML("beforeend",
-    `<tr data-fee="${i}"><td>${r[0]}</td><td>${cellInput(r[1],'f-0')}</td><td>${cellInput(r[2],'f-1')}</td></tr>`));
+    `<tr data-fee="${i}"><td>${r[0]} ${tipSpan(FEE_TIPS[i])}</td><td>${cellInput(r[1],'f-0')}</td><td>${cellInput(r[2],'f-1')}</td></tr>`));
   let o=$("otherFeeTable");
   DEF.other.forEach((r,i)=> o.insertAdjacentHTML("beforeend",
-    `<tr data-other="${i}"><td>${r[0]}</td>
+    `<tr data-other="${i}"><td>${r[0]} ${tipSpan(OTHER_TIPS[i])}</td>
       <td><select class="o-applied" style="width:52px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
       <td>${cellInput(r[2],'o-std')}</td>
       <td><select class="o-mode modeSel" style="width:46px"><option>$</option><option>%</option></select></td>
