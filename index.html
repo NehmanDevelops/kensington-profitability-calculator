@@ -252,6 +252,7 @@
     </div>
     <div class="row"><label>Client name</label><input type="text" id="clientName" value="Henry Schein Revised" style="width:170px;text-align:left"></div>
     <div class="row"><label>Currency<span class="hint" id="fxNote">USD</span></label><select id="currency"><option>USD</option><option>CAD</option></select></div>
+    <div class="row"><label>Market<span class="hint">Both = two implementation fees (CAD + USD)</span></label><select id="market"><option>US</option><option>CA</option><option>Both</option></select></div>
     <div class="row"><label>Total annual spend</label><input type="text" inputmode="decimal" class="numf money" id="totalSpend" value="1500000"></div>
     <div class="row"><label>Needs OBT?<span class="hint">Online booking tool</span></label><select id="needsOBT"><option>Yes</option><option>No</option></select></div>
     <div class="row"><label>Merchant of record on fees?</label><select id="merchant"><option>Yes</option><option>No</option></select></div>
@@ -260,10 +261,9 @@
     <details class="adv">
       <summary>Assumptions</summary>
       <div class="inner">
+        <div class="row" style="padding-left:0;padding-right:0"><label>Online vs Agent split<span class="hint">% of bookings made online (the rest are agent)</span></label><input type="text" inputmode="decimal" class="numf" id="onlineSplit" value="50"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Business / premium economy tickets<span class="hint">recorded on the summary</span></label><input type="text" inputmode="decimal" class="numf" id="bizPrem" value="0"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Hotel-only &amp; car-only bookings?</label><select id="hotelCarOnly"><option>No</option><option>Yes</option></select></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Non-GDS add-on booking %</label><input type="text" inputmode="decimal" class="numf" id="nonGdsPct" value="0"></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Client provides total spend data?</label><select id="providesSpend"><option>No</option><option>Yes</option></select></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>…by % or $</label><select id="spendUnit"><option>%</option><option>$</option></select></div>
         <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Client provides avg spend/booking?</label><select id="providesAvg"><option>No</option><option>Yes</option></select></div>
       </div>
     </details>
@@ -272,20 +272,17 @@
       <summary>Spend share &amp; bookings</summary>
       <div class="inner">
         <table class="grid" id="shareTable">
-          <tr><th>Category</th><th>Share %</th><th>BD %</th><th>BD $</th><th>Ind. avg</th><th>Client avg</th></tr>
-        </table>
-        <table class="grid" id="mgmtTable" style="margin-top:12px">
-          <tr><th>% Managed</th><th>Agent %</th><th>Online %</th><th>Online-asst %</th></tr>
+          <tr><th>Category</th><th>Share %</th><th>Ind. avg</th><th>Client avg</th></tr>
         </table>
       </div>
     </details>
 
     <details class="adv">
-      <summary>Airline mix &amp; yields</summary>
+      <summary>Air commission</summary>
       <div class="inner">
-        <p class="mininote">Air Canada commission becomes $0 in the "With Contract" scenario.</p>
+        <p class="mininote">With an <b>Air contract</b>, air commission becomes $0 (contracted fares earn none). Non-commissionable % is shown for reference.</p>
         <table class="grid" id="airTable">
-          <tr><th>Airline</th><th>Sales Dom</th><th>Sales Int'l</th><th>NC Dom</th><th>NC Int'l</th><th>Yld Dom</th><th>Yld Int'l</th></tr>
+          <tr><th>Segment</th><th>Comm %</th><th>Non-Comm %</th><th>Yield %</th></tr>
         </table>
         <table class="grid" id="hcYield" style="margin-top:12px">
           <tr><th>&nbsp;</th><th>Yield %</th><th>Commissionable %</th></tr>
@@ -296,31 +293,17 @@
     <details class="adv">
       <summary>Fee schedule</summary>
       <div class="inner">
-        <div class="row" style="padding-left:0;padding-right:0"><label>BD changes the booking fee?</label><select id="changeBookingFee"><option>No</option><option>Yes</option></select></div>
         <table class="grid" id="feeTable">
-          <tr><th>Fee</th><th>Agent std</th><th>Online std</th><th>Agent BD</th><th>Online BD</th></tr>
+          <tr><th>Fee</th><th>Agent</th><th>Online</th></tr>
         </table>
-      </div>
-    </details>
-
-    <details class="adv">
-      <summary>Agent air ticket fee (flat)</summary>
-      <div class="inner">
-        <p class="mininote">Optional: charge agent air fees by ticket count instead of deriving them from spend. When Air Canada value tops $200k, AC contract tickets are excluded.</p>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Use flat per-ticket fee?</label><select id="flatFeeMode"><option>No</option><option>Yes</option></select></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Air Canada total value over $200k?</label><select id="acOver200k"><option>No</option><option>Yes</option></select></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Air Canada tickets (excluded)</label><input class="numf" id="acTickets" value="0"></div>
-        <div class="row" style="padding-left:0;padding-right:0"><label>Total agent tickets (incl. AC)</label><input class="numf" id="totalAgentTickets" value="0"></div>
-        <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Fee per ticket</label><input class="numf money" id="flatFeeAmt" value="35"></div>
       </div>
     </details>
 
     <details class="adv">
       <summary>Other fees</summary>
       <div class="inner">
-        <div class="row" style="padding-left:0;padding-right:0"><label>BD changes the "other" fees?</label><select id="changeOtherFee"><option>No</option><option>Yes</option></select></div>
         <table class="grid" id="otherFeeTable">
-          <tr><th>Fee</th><th>Applied?</th><th>Std</th><th>BD</th><th>$/%</th></tr>
+          <tr><th>Fee</th><th>Applied?</th><th>Amount</th><th>$/%</th><th>Frequency</th></tr>
         </table>
       </div>
     </details>
@@ -331,6 +314,7 @@
   <div class="results">
     <div class="ractions">
       <button class="abtn prim" onclick="exportPDF()">⤓ Save as PDF</button>
+      <button class="abtn" onclick="copyEmail()">Copy email</button>
       <button class="abtn" onclick="shareLink()">Copy share link</button>
     </div>
     <div class="printonly print-meta" id="printMeta"></div>
@@ -406,40 +390,30 @@ const CONFIG = {
  *  DEFAULTS — pre-fill the form with the Henry Schein example.        *
  * =================================================================== */
 const CATS = ["Air - Domestic","Air - International","Hotel","Car"];
+const ASSIST_SHARE = 0.20;   // online-assisted portion of online bookings
 const DEF = {
   share:   [46.53,24.27,26.83,2.37],
-  shareBD: [45,25,27,3],
-  shareBD$:[300000,300000,100000,800000],
   indAvg:  [572.65,1661.55,511.28,222.47],
   cliAvg:  [500,1500,600,200],
-  agentPct:[50,50,50,50], onlinePct:[50,50,50,50], assistPct:[20,20,20,20],
-  airlines:[
-    // name, salesDom%, salesIntl%, nonCommDom%, nonCommIntl%, yieldDom%, yieldIntl%
-    ["Air Canada",        25,40,14.63,33.44,3.72,3.66],
-    ["American Airlines", 50,48,96.42,65.02,1.83,9.69],
-    ["Delta Airlines",    20,10,97.74,46.47,9.40,8.27],
-    ["Southwest Airlines", 0, 0,99.96,100.0,0.00,0.00],
-    ["United Airlines",    0, 0,92.93,42.37,4.89,6.02],
-    ["WestJet Airlines",   0, 0,38.49,14.03,3.71,5.59],
-    ["Other",              5, 2,70.18,45.55,3.30,6.95],
-  ],
-  hcYield: { hotelYield:8.70, hotelComm:80, carYield:5.56, carComm:80 },
-  // fee rows: label, agentStd, onlineStd, agentBD, onlineBD
+  // air commission, by segment: commissionable %, non-commissionable % (display), yield %
+  air: { domComm:25, domNonComm:75, domYield:3.7, intlComm:66, intlNonComm:34, intlYield:5.9 },
+  hcYield: { hotelYield:10, hotelComm:80, carYield:5.56, carComm:80 },
+  // fee rows: label, agent, online
   fees:[
-    ["Air - Domestic",35,15,40,15],
-    ["Air - International",35,15,40,15],
-    ["Non-GDS add on",10,0,20,5],
-    ["Online Assisted",15,0,20,20],
-    ["Hotel Only",20,15,15,5],
-    ["Car Only",20,15,15,5],
+    ["Air - Domestic",35,15],
+    ["Air - International",35,15],
+    ["Hotel Only",20,15],
+    ["Car Only",20,15],
   ],
-  // other fees: label, applied, standard, bd
+  // other fees: label, applied, amount, frequency
   other:[
-    ["Implementation Fee","Yes",500,250],
-    ["Safe to Go Imp Fee","No",0,500],
-    ["Safe to Go (per PNR)","No",0,0.50],
-    ["Account Management Fee","No",0,1500],
-    ["OBT Imp Fee","Yes",500,500],
+    ["Implementation Fee","Yes",500,"One-time"],
+    ["Safe to Go Imp Fee","No",0,"One-time"],
+    ["Safe to Go (per PNR)","No",0,"Per PNR"],
+    ["Account Management Fee","No",0,"Annual"],
+    ["OBT Imp Fee","Yes",500,"One-time"],
+    ["Conferma","No",0,"Annual"],
+    ["Annual Fee","No",0,"Annual"],
   ],
 };
 
@@ -499,72 +473,66 @@ function setLogo(){
 (function build(){
   let s=$("shareTable");
   CATS.forEach((c,i)=> s.insertAdjacentHTML("beforeend",
-    `<tr><td>${c}</td><td>${cellInput(DEF.share[i],'i-share')}</td><td>${cellInput(DEF.shareBD[i],'i-shareBD')}</td>
-     <td>${cellInput(DEF['shareBD$'][i],'i-shareBDd')}</td><td>${cellInput(DEF.indAvg[i],'i-indAvg')}</td><td>${cellInput(DEF.cliAvg[i],'i-cliAvg')}</td></tr>`));
-  let m=$("mgmtTable");
-  CATS.forEach((c,i)=> m.insertAdjacentHTML("beforeend",
-    `<tr><td>${c}</td><td>${cellInput(DEF.agentPct[i],'i-agent')}</td><td>${cellInput(DEF.onlinePct[i],'i-online')}</td><td>${cellInput(DEF.assistPct[i],'i-assist')}</td></tr>`));
+    `<tr><td>${c}</td><td>${cellInput(DEF.share[i],'i-share')}</td><td>${cellInput(DEF.indAvg[i],'i-indAvg')}</td><td>${cellInput(DEF.cliAvg[i],'i-cliAvg')}</td></tr>`));
   let a=$("airTable");
-  DEF.airlines.forEach((r,i)=> a.insertAdjacentHTML("beforeend",
-    `<tr data-air="${i}"><td>${r[0]}</td>${r.slice(1).map((v,j)=>`<td>${cellInput(v,'a-'+j)}</td>`).join("")}</tr>`));
+  a.insertAdjacentHTML("beforeend",`<tr data-air="0"><td>Domestic</td><td>${cellInput(DEF.air.domComm,'ad-comm')}</td><td>${cellInput(DEF.air.domNonComm,'ad-nc')}</td><td>${cellInput(DEF.air.domYield,'ad-yld')}</td></tr>`);
+  a.insertAdjacentHTML("beforeend",`<tr data-air="1"><td>International</td><td>${cellInput(DEF.air.intlComm,'ai-comm')}</td><td>${cellInput(DEF.air.intlNonComm,'ai-nc')}</td><td>${cellInput(DEF.air.intlYield,'ai-yld')}</td></tr>`);
   let h=$("hcYield");
   h.insertAdjacentHTML("beforeend",`<tr><td>Hotel</td><td>${cellInput(DEF.hcYield.hotelYield,'hy')}</td><td>${cellInput(DEF.hcYield.hotelComm,'hc')}</td></tr>`);
   h.insertAdjacentHTML("beforeend",`<tr><td>Car</td><td>${cellInput(DEF.hcYield.carYield,'cy')}</td><td>${cellInput(DEF.hcYield.carComm,'cc')}</td></tr>`);
   let f=$("feeTable");
   DEF.fees.forEach((r,i)=> f.insertAdjacentHTML("beforeend",
-    `<tr data-fee="${i}"><td>${r[0]}</td>${r.slice(1).map((v,j)=>`<td>${cellInput(v,'f-'+j)}</td>`).join("")}</tr>`));
+    `<tr data-fee="${i}"><td>${r[0]}</td><td>${cellInput(r[1],'f-0')}</td><td>${cellInput(r[2],'f-1')}</td></tr>`));
   let o=$("otherFeeTable");
   DEF.other.forEach((r,i)=> o.insertAdjacentHTML("beforeend",
     `<tr data-other="${i}"><td>${r[0]}</td>
       <td><select class="o-applied" style="width:52px">${["Yes","No"].map(x=>`<option ${x===r[1]?"selected":""}>${x}</option>`).join("")}</select></td>
-      <td>${cellInput(r[2],'o-std')}</td><td>${cellInput(r[3],'o-bd')}</td>
-      <td><select class="o-mode modeSel" style="width:46px"><option>$</option><option>%</option></select></td></tr>`));
+      <td>${cellInput(r[2],'o-std')}</td>
+      <td><select class="o-mode modeSel" style="width:46px"><option>$</option><option>%</option></select></td>
+      <td><select class="o-freq" style="width:78px">${["One-time","Annual","Per PNR"].map(x=>`<option ${x===r[3]?"selected":""}>${x}</option>`).join("")}</select></td></tr>`));
 })();
 setLogo();
 
 /* ---------- read the whole form into one object ---------- */
 function readInputs(){
   const col=(cls)=>[...document.querySelectorAll('.'+cls)].map(e=>num(e.value));
-  const airlines = DEF.airlines.map((_,i)=>{
-    const tds=document.querySelectorAll(`#airTable tr[data-air="${i}"] input`);
-    return {name:DEF.airlines[i][0],
-      salesDom:num(tds[0].value)/100, salesIntl:num(tds[1].value)/100,
-      nonCommDom:num(tds[2].value)/100, nonCommIntl:num(tds[3].value)/100,
-      yieldDom:num(tds[4].value)/100, yieldIntl:num(tds[5].value)/100};
-  });
+  const air = {
+    domComm:num(document.querySelector('.ad-comm').value)/100, domYield:num(document.querySelector('.ad-yld').value)/100,
+    intlComm:num(document.querySelector('.ai-comm').value)/100, intlYield:num(document.querySelector('.ai-yld').value)/100,
+  };
   const fees = DEF.fees.map((_,i)=>{
     const t=document.querySelectorAll(`#feeTable tr[data-fee="${i}"] input`);
-    return {agentStd:num(t[0].value),onlineStd:num(t[1].value),agentBD:num(t[2].value),onlineBD:num(t[3].value)};
+    return {agentStd:num(t[0].value), onlineStd:num(t[1].value)};
   });
-  const other = DEF.other.map((_,i)=>{
+  const other = DEF.other.map((d,i)=>{
     const r=document.querySelector(`#otherFeeTable tr[data-other="${i}"]`);
-    const md=r.querySelector('.o-mode');
-    return {applied:r.querySelector('.o-applied').value, std:num(r.querySelector('.o-std').value), bd:num(r.querySelector('.o-bd').value), mode:(md?md.value:'$')};
+    const md=r.querySelector('.o-mode'), fq=r.querySelector('.o-freq');
+    return {label:d[0], applied:r.querySelector('.o-applied').value, amount:num(r.querySelector('.o-std').value),
+            mode:(md?md.value:'$'), freq:(fq?fq.value:'One-time')};
   });
+  const online = num($("onlineSplit").value)/100;
   return {
     clientName:$("clientName").value,
     currency:$("currency").value,
+    market:$("market").value,
     totalSpend:num($("totalSpend").value),
     needsOBT:$("needsOBT").value, merchant:$("merchant").value,
-    hotelCarOnly:$("hotelCarOnly").value, nonGdsPct:num($("nonGdsPct").value)/100,
-    providesSpend:$("providesSpend").value, spendUnit:$("spendUnit").value, providesAvg:$("providesAvg").value,
-    changeBookingFee:$("changeBookingFee").value, changeOtherFee:$("changeOtherFee").value,
-    share:col('i-share').map(x=>x/100), shareBD:col('i-shareBD').map(x=>x/100), shareBD$:col('i-shareBDd'),
+    hotelCarOnly:$("hotelCarOnly").value, providesAvg:$("providesAvg").value,
+    bizPrem:num($("bizPrem").value),
+    share:col('i-share').map(x=>x/100),
     indAvg:col('i-indAvg'), cliAvg:col('i-cliAvg'),
-    agentPct:col('i-agent').map(x=>x/100), onlinePct:col('i-online').map(x=>x/100), assistPct:col('i-assist').map(x=>x/100),
-    airlines,
+    agentPct:CATS.map(()=>1-online), onlinePct:CATS.map(()=>online), assistPct:CATS.map(()=>ASSIST_SHARE),
+    air,
     hotelYield:num(document.querySelector('.hy').value)/100, hotelComm:num(document.querySelector('.hc').value)/100,
     carYield:num(document.querySelector('.cy').value)/100, carComm:num(document.querySelector('.cc').value)/100,
     concierge:{ val:num($("conciergeVal").value), mode:$("conciergeMode").value },
-    flat:{ on:$("flatFeeMode").value==='Yes', acOver:$("acOver200k").value==='Yes',
-           acTickets:num($("acTickets").value), totalAgent:num($("totalAgentTickets").value), fee:num($("flatFeeAmt").value) },
     fees, other,
   };
 }
 
 /* =================================================================== *
  *  THE ENGINE  (see ENGINE.md for the full methodology)              *
- *  acContract = true  ⇒  Air Canada earns no commission.              *
+ *  acContract = true  ⇒  air commission is zeroed (contracted fares).  *
  * =================================================================== */
 function acctMgmtDays(spend){
   for(const t of CONFIG.acctMgmtDayTiers) if(spend>=t.min) return t.days;
@@ -572,10 +540,7 @@ function acctMgmtDays(spend){
 }
 function compute(inp, acContract){
   const R = Math.round;
-  const base = CATS.map((_,i)=>
-    inp.providesSpend==="Yes"
-      ? (inp.spendUnit==="%" ? inp.totalSpend*inp.shareBD[i] : inp.shareBD$[i])
-      : inp.totalSpend*inp.share[i]);
+  const base = CATS.map((_,i)=> inp.totalSpend*inp.share[i]);
   const avg  = CATS.map((_,i)=> inp.providesAvg==="No" ? inp.indAvg[i] : inp.cliAvg[i]);
 
   const obt = inp.needsOBT==="Yes";
@@ -592,52 +557,36 @@ function compute(inp, acContract){
     hcOn ? {agent:R(bk[3].agent*0.05),online:R(bk[3].online*0.45),assist:R(bk[3].assist*0.05)} : {agent:0,online:0,assist:0},
   ].map(o=>({...o,total:o.agent+o.online+o.assist}));
 
-  // COMMISSION
-  let airDomComm=0, airIntlComm=0;
-  for(const a of inp.airlines){
-    let ncD=a.nonCommDom, ncI=a.nonCommIntl;
-    if(acContract && a.name==="Air Canada"){ ncD=1; ncI=1; }
-    airDomComm  += base[0]*a.salesDom *(1-ncD)*a.yieldDom;
-    airIntlComm += base[1]*a.salesIntl*(1-ncI)*a.yieldIntl;
-  }
+  // COMMISSION (air: commissionable % × yield; zeroed under an Air contract)
+  const airDomComm  = acContract ? 0 : base[0]*inp.air.domComm*inp.air.domYield;
+  const airIntlComm = acContract ? 0 : base[1]*inp.air.intlComm*inp.air.intlYield;
   const hotelComm = base[2]*inp.hotelYield*inp.hotelComm;
   const carComm   = base[3]*inp.carYield  *inp.carComm;
   const commrev = airDomComm + airIntlComm + hotelComm + carComm;
 
-  // SERVICE FEE REVENUE
-  const chg = inp.changeBookingFee==="Yes";
-  const fAgent = i=> chg ? inp.fees[i].agentBD : inp.fees[i].agentStd;
-  const fOnline= i=> chg ? inp.fees[i].onlineBD: inp.fees[i].onlineStd;
+  // SERVICE FEE REVENUE  (fees: 0 air-dom, 1 air-intl, 2 hotel-only, 3 car-only)
+  const fAgent = i=> inp.fees[i].agentStd;
+  const fOnline= i=> inp.fees[i].onlineStd;
   const oaFee  = CONFIG.onlineAssistFee;
   function svc(b, feeIdx){ return b.agent*fAgent(feeIdx) + b.online*fOnline(feeIdx) + b.assist*(fOnline(feeIdx)+oaFee); }
-  // agent air fee: per-booking (default) OR flat per-ticket count when flat-fee mode is on
-  const agentAirDerived = bk[0].agent*fAgent(0) + bk[1].agent*fAgent(1);
-  const airOnlineAssist = (bk[0].online*fOnline(0)+bk[0].assist*(fOnline(0)+oaFee))
-                        + (bk[1].online*fOnline(1)+bk[1].assist*(fOnline(1)+oaFee));
-  let agentAir = agentAirDerived;
-  if(inp.flat.on){
-    const tickets = Math.max(0, inp.flat.totalAgent - (inp.flat.acOver ? inp.flat.acTickets : 0));
-    agentAir = tickets * inp.flat.fee;
-  }
-  const srvfeerev = agentAir + airOnlineAssist + svc(hcOnly[0],4) + svc(hcOnly[1],5);
-
-  // NON-GDS FEE REVENUE
-  const nonGdsFee = chg ? inp.fees[2].agentBD : inp.fees[2].agentStd;
-  const airTotalBkgs = bk[0].total + bk[1].total + hcOnly[0].total + hcOnly[1].total;
-  const nongdsrev = airTotalBkgs * inp.nonGdsPct * nonGdsFee;
+  const srvfeerev = svc(bk[0],0) + svc(bk[1],1) + svc(hcOnly[0],2) + svc(hcOnly[1],3);
 
   // OVERRIDES
   const overriderev = base[0]*CONFIG.overrideAirPct + base[1]*CONFIG.overrideAirPct
                     + base[2]*CONFIG.overrideHotelPct + base[3]*CONFIG.overrideCarPct;
   const gdsoverriderev = (bk[0].total*CONFIG.gdsSegPerAirDom + bk[1].total*CONFIG.gdsSegPerAirIntl)*CONFIG.gdsOverridePerSeg;
 
-  // OTHER FEES (each row: flat $, or % of category sales when its mode = %)
-  const O = inp.other, co = inp.changeOtherFee==="Yes";
-  const rawOther = (i)=> co ? (O[i].applied==="No" ? 0 : O[i].bd) : O[i].std;
-  const otherAmt = (i, cs)=> (O[i].mode==='%' ? (rawOther(i)/100)*cs : rawOther(i));
-  const s2goPnrFee= co ? (O[2].applied==="No"?0:O[2].bd) : O[2].std;   // per-PNR, always $
+  // OTHER FEES — mode ($ or % of category sales) + frequency (One-time / Annual / Per PNR)
+  const O = inp.other;
   const s2goPnrBkgs = bk[0].total + bk[1].total;
-  const s2goPnrCost = 0;
+  function otherRev(o, cs, isY1, sp){
+    if(o.freq==='Per PNR') return (o.applied==='No'?0:o.amount) * s2goPnrBkgs * sp;
+    if(o.applied==='No') return 0;
+    if(/OBT/i.test(o.label) && !obt) return 0;
+    let amt = o.mode==='%' ? (o.amount/100)*cs : o.amount;
+    if(/Implementation Fee/i.test(o.label) && inp.market==='Both') amt *= 2;   // CAD + USD ticketing
+    return o.freq==='One-time' ? (isY1 ? amt : 0) : amt;
+  }
 
   // COST DRIVERS
   const staffTxns = bk[0].agent+bk[1].agent+hcOnly[0].agent+hcOnly[1].agent
@@ -655,32 +604,27 @@ function compute(inp, acContract){
     const catSales = base.reduce((a,_,i)=> a + inp.totalSpend*inp.share[i]*sp, 0);
     const rCommission = commrev*sp;
     const rService    = srvfeerev*sp;
-    const rNonGds     = nongdsrev*sp;
-    const rImpl       = isY1 ? otherAmt(0,catSales) : 0;
-    const rS2goImp    = isY1 ? otherAmt(1,catSales) : 0;
-    const rS2goPnr    = s2goPnrFee*s2goPnrBkgs*sp;
-    const rObtImp     = isY1 ? (obt ? otherAmt(4,catSales) : 0) : 0;
-    const rAcct       = otherAmt(3,catSales);
+    const others      = O.map(o=>({label:o.label, val:otherRev(o,catSales,isY1,sp)}));
+    const otherSum    = others.reduce((a,x)=>a+x.val,0);
     const rConcierge  = inp.concierge.mode==='%' ? (inp.concierge.val/100)*catSales : inp.concierge.val;
     const rOverride   = (overriderev + gdsoverriderev)*sp;
-    const feeRevenue  = rService + rNonGds + rImpl + rS2goImp + rS2goPnr + rObtImp + rAcct;
+    const feeRevenue  = rService + otherSum;
     const totalSales  = catSales + feeRevenue;
     const totalRevenue= rCommission + feeRevenue + rOverride + rConcierge;
     const eSales   = -salesTeamCost*sp;
     const eObt     = -obtAnnualCost*sp;
     const eObtImp  = isY1 ? -(obt?CONFIG.obtImplCost:0) : 0;
-    const eS2goPnr = -s2goPnrCost*sp;
     const eAcct    = -acctMgmtCost;
     const e247     = -cost247*sp;
     const eMerchant= inp.merchant==="Yes" ? -feeRevenue*CONFIG.merchantFeePct : 0;
-    const directExp= eSales+eObt+eObtImp+eS2goPnr+eAcct+e247+eMerchant;
+    const directExp= eSales+eObt+eObtImp+eAcct+e247+eMerchant;
     const grossProfit = totalRevenue + directExp;
     const ovh = -totalSales*(CONFIG.overheadMarketingPct+CONFIG.overheadOperatingPct+CONFIG.overheadBackOfficePct);
     const netProfit = grossProfit + ovh;
     return {
-      sp, catSales, rCommission, rService, rNonGds, rImpl, rS2goImp, rS2goPnr, rObtImp, rAcct, rConcierge, rOverride,
+      sp, catSales, rCommission, rService, others, rConcierge, rOverride,
       feeRevenue, totalSales, totalRevenue,
-      eSales,eObt,eObtImp,eS2goPnr,eAcct,e247,eMerchant,directExp,grossProfit,ovh,netProfit,
+      eSales,eObt,eObtImp,eAcct,e247,eMerchant,directExp,grossProfit,ovh,netProfit,
       mGrowthExcl:(totalRevenue-rOverride)/totalSales,
       mGrowthIncl:totalRevenue/totalSales,
       mNetExcl:grossProfit/totalSales,
@@ -719,19 +663,21 @@ function renderCard(el, title, res, isBest){
 }
 
 function renderPL(elId, base, ctr){
-  const B=base.years, C=ctr.years;
+  const B=base.years;
   const r=(label,k,cls)=>`<tr class="${cls||''}"><td>${label}</td>`+
     [0,1,2].map(y=>{const v=B[y][k];return `<td class="num ${v<0?'neg':''}">${fmtP(v)}</td>`}).join('')+`</tr>`;
+  // other-fee rows: one per fee, but only if it contributes in any year
+  const otherRows = B[0].others.map((o,idx)=>{
+    if(![0,1,2].some(y=>B[y].others[idx].val!==0)) return '';
+    return `<tr><td>${o.label}</td>`+[0,1,2].map(y=>{const v=B[y].others[idx].val;return `<td class="num ${v<0?'neg':''}">${fmtP(v)}</td>`}).join('')+`</tr>`;
+  }).join('');
   $(elId).innerHTML = `<table class="pl">
-    <tr class="head"><td>Without AC contract</td><td class="num">Year 1</td><td class="num">Year 2</td><td class="num">Year 3</td></tr>
+    <tr class="head"><td>Without Air contract</td><td class="num">Year 1</td><td class="num">Year 2</td><td class="num">Year 3</td></tr>
     ${r('Total Sales','totalSales','total')}
     <tr class="section"><td colspan="4">Revenue</td></tr>
     ${r('Commission','rCommission')}
     ${r('Service fees','rService')}
-    ${r('Non-GDS fees','rNonGds')}
-    ${r('Implementation','rImpl')}
-    ${r('OBT implementation','rObtImp')}
-    ${r('Account mgmt fee','rAcct')}
+    ${otherRows}
     ${r('Concierge & Entourage','rConcierge')}
     ${r('Back-end overrides','rOverride')}
     ${r('Total Revenue','totalRevenue','total')}
@@ -756,18 +702,18 @@ function recalc(){
   FX = inp.currency==='CAD' ? CONFIG.fxUsdToCad : 1;
   CURSYM = inp.currency==='CAD' ? 'CA$' : '$';
   const fxNote = $("fxNote"); if(fxNote) fxNote.textContent = inp.currency==='CAD' ? ('shown ×'+CONFIG.fxUsdToCad) : 'USD';
-  const baseRes = compute(inp, false);   // No AC contract
-  const ctrRes  = compute(inp, true);    // With AC contract
+  const baseRes = compute(inp, false);   // no air contract
+  const ctrRes  = compute(inp, true);    // with air contract
   const nb=baseRes.years[0].netProfit, nc=ctrRes.years[0].netProfit;
 
-  renderCard($("scnBase"),     "Without AC contract", baseRes, nb>=nc);
-  renderCard($("scnContract"), "With AC contract",    ctrRes,  nc>nb);
+  renderCard($("scnBase"),     "Without Air contract", baseRes, nb>=nc);
+  renderCard($("scnContract"), "With Air contract",    ctrRes,  nc>nb);
 
   const diff = Math.abs(nb-nc);
   const better = nb>=nc ? "without" : "with";
   $("delta").innerHTML =
-    `<span class="big">Booking Air Canada on contract rates lowers Year-1 net profit by <b>${fmt(diff)}</b>.</span>`+
-    `${fmt(nb)} without the contract vs ${fmt(nc)} with it — because you forgo Air Canada commission on contracted fares. `+
+    `<span class="big">An air contract changes Year-1 net profit by <b>${fmt(diff)}</b>.</span>`+
+    `${fmt(nb)} without a contract vs ${fmt(nc)} with one — under a contract you don’t earn commission on contracted air. `+
     `The <b>${better}</b>-contract scenario is more profitable for ${inp.clientName||'this client'}.`;
 
   renderPL("plDetail", baseRes, ctrRes);
@@ -806,30 +752,24 @@ const HOW_HTML = `
   </ol>
 
   <h3>Representative formulas</h3>
-  <pre>Air commission  = Σ airlines [ air sales × airline share × commissionable% × yield% ]
+  <pre>Air commission  = air sales × commissionable% × yield%   (Domestic + International)
 Service fees    = Σ [ agent bkgs × agent fee + online bkgs × online fee
                       + assisted bkgs × (online fee + assist fee) ]
 Overrides       = air spend × 1.5% + car spend × 2% + GDS segments × $1.65
 Net profit      = (Revenue − Direct expenses) − Overhead</pre>
 
   <h3>The two scenarios</h3>
-  <p>With an <b>Air Canada contract</b>, the client books contracted fares and you earn
-  <b>no commission</b> on Air Canada — so AC's commissionable share is set to 0. <b>Without</b> the
-  contract, AC commission flows normally. Everything else is identical, so the gap you see between
-  the two cards is purely the Air Canada commission you give up on contracted fares.</p>
+  <p>With an <b>Air contract</b>, the client books contracted fares and you earn
+  <b>no commission</b> on air — so air commission is set to $0. <b>Without</b> the
+  contract, air commission (commissionable % × yield, by Domestic / International) flows normally.
+  Everything else is identical, so the gap between the two cards is purely the air commission you
+  give up on contracted fares.</p>
 
-  <h3>Proof — reconciles to the reference model (Henry Schein, Year 1)</h3>
-  <table class="val">
-    <tr><th>Line</th><th>This calculator</th><th>Reference model</th><th></th></tr>
-    <tr><td>Total Revenue</td><td>$88,320</td><td>$88,306</td><td class="okmark">✓</td></tr>
-    <tr><td>Gross Profit</td><td>$60,073</td><td>$60,064</td><td class="okmark">✓</td></tr>
-    <tr><td>Net Profit</td><td>$12,045</td><td>$12,036</td><td class="okmark">✓</td></tr>
-    <tr><td>Growth margin (incl. overrides)</td><td>7.2%</td><td>7.17%</td><td class="okmark">✓</td></tr>
-    <tr><td>Net margin (excl. fixed)</td><td>4.9%</td><td>4.88%</td><td class="okmark">✓</td></tr>
-  </table>
-  <p style="font-size:12.5px;color:var(--muted)">The few-dollar differences come only from rounding the
-  share % shown on screen (46.53% here vs 46.5276% at full precision). The full formula-by-formula
-  breakdown is documented in <code>ENGINE.md</code> in the project repository.</p>`;
+  <h3>Nothing hidden</h3>
+  <p>Every figure is computed live from the inputs above — booking counts from spend ÷ average
+  fare, commission and fees from the rates you set, less servicing and overhead costs. Change any
+  input and all three years recalculate instantly. The full methodology is documented in
+  <code>ENGINE.md</code> in the project repository.</p>`;
 
 const IT_HTML = `
   <div class="callout">The whole tool is <b>one file — <code>index.html</code></b> — no server, no
@@ -895,7 +835,7 @@ const TOUR = [
   {sel:'#inputs',       t:'1 · Enter the deal',       x:'Type the client name and total annual spend, then answer a couple of questions. Everything else has smart defaults you can open and adjust.'},
   {sel:'.saved-bar',    t:'2 · Save & switch deals',  x:'Built a deal? Hit Save to keep it. Start another with “New client”, then reopen any saved deal from this menu anytime — they’re kept in your browser, and Delete removes one.'},
   {sel:'.modebar .tip', t:'3 · Stuck on a term?',     x:'See a “?” next to a field? Click it and a little box explains that field in plain English — so nothing is left as jargon.', open:'#inputs'},
-  {sel:'.cards',        t:'4 · Two live scenarios',   x:'The model instantly computes Year-1 net profit two ways — with and without an Air Canada contract. The green “Higher profit” card is the better outcome.'},
+  {sel:'.cards',        t:'4 · Two live scenarios',   x:'The model instantly computes Year-1 net profit two ways — with and without an air contract. The card marked “Recommended” is the more profitable outcome.'},
   {sel:'#delta',        t:'5 · Plain-English impact', x:'A one-line takeaway shows exactly how much profit the airline contract adds or removes, and why.'},
   {sel:'details.pl',    t:'6 · Full 3-year P&L',      x:'Open this for the complete revenue, expense and margin breakdown across all three years.', open:'details.pl'},
   {sel:'#howBtn',       t:'7 · Show the math',        x:'“How it’s calculated” lists every formula and shows the model reconciles to the dollar.'},
@@ -950,6 +890,29 @@ function toast(m){
   t.textContent = m; t.classList.add('show');
   clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2400);
 }
+function copyEmail(){
+  const inp = readInputs();
+  const b = compute(inp,false).years[0], c = compute(inp,true).years[0];
+  const body = [
+    `Hi,`, ``,
+    `Here's the profitability summary for ${inp.clientName||'the client'} — ${inp.market}, ${inp.currency}:`, ``,
+    `Total annual spend:            ${fmt(inp.totalSpend)}`,
+    `Year-1 net profit (no contract): ${fmt(b.netProfit)}`,
+    `Year-1 net profit (air contract):${fmt(c.netProfit)}`,
+    `Year-1 total revenue:          ${fmt(b.totalRevenue)}`,
+    `Growth margin (incl. overrides): ${(b.mGrowthIncl*100).toFixed(1)}%`,
+    `Net margin (excl. fixed costs):  ${(b.mNetExcl*100).toFixed(1)}%`,
+    inp.bizPrem>0 ? `Business / premium economy tickets: ${Math.round(inp.bizPrem).toLocaleString()}` : ``,
+    ``, `Full breakdown available on request.`, ``, `Kensington Corporate`,
+  ].filter(l=>l!==undefined).join('\n');
+  const subject = `Profitability summary — ${inp.clientName||'Client'}`;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(body).then(()=>toast('Email summary copied — paste into your email'))
+      .catch(()=>window.prompt('Copy this summary:', body));
+  } else { window.prompt('Copy this summary:', body); }
+  // also offer to open the mail client
+  try{ window.open('mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body), '_blank'); }catch(e){}
+}
 function shareLink(){
   const els = formEls();
   const data = btoa(unescape(encodeURIComponent(JSON.stringify(els.map(e=>e.value)))));
@@ -971,7 +934,7 @@ function restoreFromLink(){
 /* =================================================================== *
  *  PERSISTENCE (auto-save), TOOLTIPS, RESET                           *
  * =================================================================== */
-const STORAGE_KEY = 'kenProfitCalc.v2';
+const STORAGE_KEY = 'kenProfitCalc.v3';
 /* sets every fee's $/% selector at once (per-field selectors can still be changed) */
 function setAllModes(m){
   document.querySelectorAll('.modeSel').forEach(s=>{ s.value=m; });
@@ -984,7 +947,7 @@ function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(form
 function loadState(){ try{ const s=localStorage.getItem(STORAGE_KEY); if(!s) return false; const v=JSON.parse(s); const els=formEls(); v.forEach((x,i)=>{ if(els[i]!==undefined) els[i].value=x; }); return true; }catch(e){ return false; } }
 
 /* ---- named saved deals (save / load / delete multiple) ---- */
-const DEALS_KEY = 'kenProfitCalc.deals.v2';
+const DEALS_KEY = 'kenProfitCalc.deals.v3';
 function getDeals(){ try{ return JSON.parse(localStorage.getItem(DEALS_KEY)||'{}'); }catch(e){ return {}; } }
 function putDeals(d){ try{ localStorage.setItem(DEALS_KEY, JSON.stringify(d)); }catch(e){} }
 function refreshSavedList(sel){
