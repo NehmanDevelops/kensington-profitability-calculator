@@ -261,7 +261,7 @@
     <details class="adv">
       <summary>Assumptions <span class="tip" data-tip="General deal assumptions: the online vs. agent booking split, the count of business/premium-economy tickets, whether the client books hotel/car on their own, and whether they provided their own average fares.">?</span></summary>
       <div class="inner">
-        <div class="row" style="padding-left:0;padding-right:0"><label>Online vs Agent split<span class="hint">% of bookings made online (the rest are agent)</span></label><input type="text" inputmode="decimal" class="numf" id="onlineSplit" value="0"></div>
+        <div class="row" style="padding-left:0;padding-right:0"><label>Online vs Agent split<span class="hint">% of bookings made online (the rest are agent)</span></label><input type="text" inputmode="decimal" class="numf" id="onlineSplit" value="50"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Business / premium economy tickets<span class="hint">recorded on the summary</span></label><input type="text" inputmode="decimal" class="numf" id="bizPrem" value="0"></div>
         <div class="row" style="padding-left:0;padding-right:0"><label>Hotel-only &amp; car-only bookings?</label><select id="hotelCarOnly"><option>No</option><option>Yes</option></select></div>
         <div class="row" style="padding-left:0;padding-right:0;border-bottom:none"><label>Client provides avg spend/booking?</label><select id="providesAvg"><option>No</option><option>Yes</option></select></div>
@@ -392,26 +392,28 @@ const CONFIG = {
 const CATS = ["Air - Domestic","Air - International","Hotel","Car"];
 const ASSIST_SHARE = 0.20;   // online-assisted portion of online bookings
 const DEF = {
-  share:   [0,0,0,0],
-  indAvg:  [0,0,0,0],
-  cliAvg:  [0,0,0,0],
+  // deal-specific (start at 0); standard rates below are pre-filled
+  share:   [0,0,0,0],          // spend share % — entered per client
+  cliAvg:  [0,0,0,0],          // client's own avg fares — entered only if provided
+  // standard reference rates (pre-filled defaults)
+  indAvg:  [572.65,1661.55,511.28,222.47],   // industry average fare per booking
   // air commission, by segment: commissionable %, non-commissionable % (display), yield %
-  air: { domComm:0, domNonComm:0, domYield:0, intlComm:0, intlNonComm:0, intlYield:0 },
-  hcYield: { hotelYield:0, hotelComm:0, carYield:0, carComm:0 },
+  air: { domComm:25, domNonComm:75, domYield:3.7, intlComm:66, intlNonComm:34, intlYield:5.9 },
+  hcYield: { hotelYield:10, hotelComm:80, carYield:5.56, carComm:80 },
   // fee rows: label, agent, online
   fees:[
-    ["Air - Domestic",0,0],
-    ["Air - International",0,0],
-    ["Hotel Only",0,0],
-    ["Car Only",0,0],
+    ["Air - Domestic",35,15],
+    ["Air - International",35,15],
+    ["Hotel Only",20,15],
+    ["Car Only",20,15],
   ],
-  // other fees: label, applied, amount, frequency
+  // other fees: label, applied, amount, frequency  (standard amounts pre-filled)
   other:[
-    ["Implementation Fee","No",0,"One-time"],
+    ["Implementation Fee","Yes",500,"One-time"],
     ["Safe to Go Imp Fee","No",0,"One-time"],
     ["Safe to Go (per PNR)","No",0,"Per PNR"],
     ["Account Management Fee","No",0,"Annual"],
-    ["OBT Imp Fee","No",0,"One-time"],
+    ["OBT Imp Fee","Yes",500,"One-time"],
     ["Conferma","No",0,"Annual"],
     ["Annual Fee","No",0,"Annual"],
   ],
@@ -580,6 +582,7 @@ function compute(inp, acContract){
   const O = inp.other;
   const s2goPnrBkgs = bk[0].total + bk[1].total;
   function otherRev(o, cs, isY1, sp){
+    if(inp.totalSpend<=0) return 0;   // no deal yet → no fees (keeps a blank form at $0)
     if(o.freq==='Per PNR') return (o.applied==='No'?0:o.amount) * s2goPnrBkgs * sp;
     if(o.applied==='No') return 0;
     if(/OBT/i.test(o.label) && !obt) return 0;
