@@ -472,13 +472,24 @@ function setLogo(){
   else { e.innerHTML=`<span class="wordmark">Kensington Corporate</span>`; }
 }
 
+const SHARE_TIPS = [
+  "Share of the client's total spend on domestic air (flights within the country). Share % × total spend ÷ average fare estimates the number of domestic air bookings.",
+  "Share of total spend on international air (including transborder). Drives the international air booking and commission estimate.",
+  "Share of total spend on hotel bookings — used for hotel commission.",
+  "Share of total spend on car rentals — used for car commission.",
+];
+const AIR_TIPS = [
+  "Domestic air commission: the commissionable % of domestic air sales × the yield % earned on it. Non-commissionable % is shown for reference.",
+  "International air commission: the commissionable % of international air sales × the yield %. Non-commissionable % is shown for reference.",
+];
+const tipSpan = t => `<span class="tip" data-tip="${t}">?</span>`;
 (function build(){
   let s=$("shareTable");
   CATS.forEach((c,i)=> s.insertAdjacentHTML("beforeend",
-    `<tr><td>${c}</td><td>${cellInput(DEF.share[i],'i-share')}</td><td>${cellInput(DEF.indAvg[i],'i-indAvg')}</td><td>${cellInput(DEF.cliAvg[i],'i-cliAvg')}</td></tr>`));
+    `<tr><td>${c} ${tipSpan(SHARE_TIPS[i])}</td><td>${cellInput(DEF.share[i],'i-share')}</td><td>${cellInput(DEF.indAvg[i],'i-indAvg')}</td><td>${cellInput(DEF.cliAvg[i],'i-cliAvg')}</td></tr>`));
   let a=$("airTable");
-  a.insertAdjacentHTML("beforeend",`<tr data-air="0"><td>Domestic</td><td>${cellInput(DEF.air.domComm,'ad-comm')}</td><td>${cellInput(DEF.air.domNonComm,'ad-nc')}</td><td>${cellInput(DEF.air.domYield,'ad-yld')}</td></tr>`);
-  a.insertAdjacentHTML("beforeend",`<tr data-air="1"><td>International</td><td>${cellInput(DEF.air.intlComm,'ai-comm')}</td><td>${cellInput(DEF.air.intlNonComm,'ai-nc')}</td><td>${cellInput(DEF.air.intlYield,'ai-yld')}</td></tr>`);
+  a.insertAdjacentHTML("beforeend",`<tr data-air="0"><td>Domestic ${tipSpan(AIR_TIPS[0])}</td><td>${cellInput(DEF.air.domComm,'ad-comm')}</td><td>${cellInput(DEF.air.domNonComm,'ad-nc')}</td><td>${cellInput(DEF.air.domYield,'ad-yld')}</td></tr>`);
+  a.insertAdjacentHTML("beforeend",`<tr data-air="1"><td>International ${tipSpan(AIR_TIPS[1])}</td><td>${cellInput(DEF.air.intlComm,'ai-comm')}</td><td>${cellInput(DEF.air.intlNonComm,'ai-nc')}</td><td>${cellInput(DEF.air.intlYield,'ai-yld')}</td></tr>`);
   let h=$("hcYield");
   h.insertAdjacentHTML("beforeend",`<tr><td>Hotel</td><td>${cellInput(DEF.hcYield.hotelYield,'hy')}</td><td>${cellInput(DEF.hcYield.hotelComm,'hc')}</td></tr>`);
   h.insertAdjacentHTML("beforeend",`<tr><td>Car</td><td>${cellInput(DEF.hcYield.carYield,'cy')}</td><td>${cellInput(DEF.hcYield.carComm,'cc')}</td></tr>`);
